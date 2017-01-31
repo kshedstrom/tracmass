@@ -38,20 +38,20 @@ INTEGER             :: mta,msa,m
 !		  do m=msb,msa-1
 !           psi_ts(mtb,m,2,lbas) = psi_ts(mtb,m,2,lbas) - flux
 !          enddo
-          
-          
+
+
          do m=mta,mtb-1
            psi_ts(m,msa,1,lbas) = psi_ts(m,msa,1,lbas) + flux
-          enddo
-		  do m=mtb+1,mta
+         enddo
+         do m=mtb+1,mta
            psi_ts(m,msa,1,lbas) = psi_ts(m,msa,1,lbas) - flux
-          enddo
-		  do m=msa,msb-1
+         enddo
+         do m=msa,msb-1
            psi_ts(mta,m,2,lbas) = psi_ts(mta,m,2,lbas) + flux
-          enddo
-		  do m=msb+1,msa
+         enddo
+         do m=msb+1,msa
            psi_ts(mta,m,2,lbas) = psi_ts(mta,m,2,lbas) - flux
-          enddo
+         enddo
 #endif
 
 flux = flux*real(dir)
@@ -75,7 +75,7 @@ select case(xy)
           stxr(ia,msb,lbas,3) = stxr(ia,msb,lbas,3) + flux
 #endif
 
-    
+
      ! === Meridional component ===
      case(2)
           ! === Barotropic stream function ===
@@ -92,7 +92,7 @@ select case(xy)
 #endif
 #ifdef streamts
           styr(ja,mtb,lbas,2) = styr(ja,mtb,lbas,2) + flux
-          styr(ja,msb,lbas,3) = styr(ja,msb,lbas,3) + flux 
+          styr(ja,msb,lbas,3) = styr(ja,msb,lbas,3) + flux
 #endif
 
 !     ! === Vertical component ===
@@ -105,11 +105,11 @@ end select
 #ifdef tracer_convergence
 select case(xy)
      case(1)
-   	  converg(ia,ja,ka,lbas,1) = converg(ia,ja,ka,lbas,1) + flux
+       converg(ia,ja,ka,lbas,1) = converg(ia,ja,ka,lbas,1) + flux
      case(2)
-   	  converg(ia,ja,ka,lbas,2) = converg(ia,ja,ka,lbas,2) + flux
+       converg(ia,ja,ka,lbas,2) = converg(ia,ja,ka,lbas,2) + flux
      case(3)
-   	  converg(ia,ja,ka,lbas,3) = converg(ia,ja,ka,lbas,3) + flux
+       converg(ia,ja,ka,lbas,3) = converg(ia,ja,ka,lbas,3) + flux
 end select
 #endif
 
