@@ -18,7 +18,8 @@ IMPLICIT NONE
 
 INTEGER             :: ia,ja,ka   !where to write
 REAL*8              :: x1,y1,z1
-INTEGER             :: xy, dir !1 - zonal, 2 - meridional, 3 - vertical
+INTEGER             :: xy         !1 - zonal, 2 - meridional, 3 - vertical
+INTEGER             :: dir
 REAL                :: flux
 REAL                :: temp,salt,dens
 INTEGER             :: mrb,mtb,msb

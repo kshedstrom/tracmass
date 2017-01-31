@@ -9,24 +9,24 @@ SUBROUTINE readfields
   USE mod_name
   USE mod_vel
   USE mod_getfile
-  
+  USE mod_seed, only: nff! LD ADDED, for nff
 #ifdef tempsalt
   USE mod_dens
 #endif
-  
+
   IMPLICIT none
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-  ! = Variables for filename generation 
+  ! = Variables for filename generation
   CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix, dstamp
   INTEGER                                    :: intpart1 ,intpart2
   INTEGER                                    :: ndates
   INTEGER                                    :: yr1 ,mn1 ,dy1,hr
   INTEGER                                    :: yr2 ,mn2 ,dy2
-  
+
   ! = Loop variables
   INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
-  
+
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
   CHARACTER (len=50)                         :: varName
@@ -40,7 +40,7 @@ SUBROUTINE readfields
   REAL*8,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
   ! ===   ===   ===
 
-  
+
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt), dzt0(imt,jmt) )
      allocate ( sc_r(km), Cs_r(km) )
@@ -62,12 +62,12 @@ SUBROUTINE readfields
   ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
-  dstamp      = 'coral_avg_XXXXX.nc'
+  dstamp      = 'arctic2_avg_XXXX_XX_XX.nc'
 
-  !write (dstamp(11:15),'(I5.5)') & 
-       !int(currJDtot) - 731365
-  write (dstamp(11:15),'(I5.5)') &
-       int(currJDtot) - 714777
+  write (dstamp(13:16),'(i4i2)') currYear
+  write(dstamp(18:19),'(i2.2)')  currMon
+  write(dstamp(21:22),'(i2.2)')  currDay
+
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
   print *, "curr JD:", currJDtot, "read file:", dataprefix
@@ -87,7 +87,7 @@ SUBROUTINE readfields
   where (ssh > 1000)
      ssh = 0
   end where
-  !hs(:,:,2) = ssh
+
   hs(:imt,:jmt,2) = ssh(:imt,:jmt)
 
 #ifdef explicit_w
@@ -97,8 +97,6 @@ SUBROUTINE readfields
       wflux(i,j,0:km-1,2) = wvel(i,j,1:km)*dxdy(i,j)
     end do
   end do
-  !print *, 'wflux=', wflux(410,255,50,2), wflux(410,255,49,2), wflux(410,255,48,2)
-  !print *, 'wflux=', wflux(410,255,3,2), wflux(410,255,1,2), wflux(410,255,0,2)
 #endif
 
   Cs_w = get1DfieldNC (trim(dataprefix), 'Cs_w')
@@ -106,14 +104,6 @@ SUBROUTINE readfields
   Cs_r = get1DfieldNC (trim(dataprefix), 'Cs_r')
   sc_r = get1DfieldNC (trim(dataprefix), 's_rho')
   hc   = getScalarNC (trim(dataprefix), 'hc')
-
-  !do k=1,km
-  !   dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
-  !   dzt(:,:,k) = ssh + (ssh + depth) / dzt0
-  !end do
-  !dzt0 = dzt(:,:,km)
-  !dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
-  !dzt(:,:,km) = dzt0-ssh
 
   z_w(:,:,0,2) = depth
   do k=1,km
@@ -149,7 +139,7 @@ SUBROUTINE readfields
      vflux(:,1:jmt,k,2)   = vvel(:imt,:,k) * dzv(:,:,k) * dxv(:imt,:)
   end do
 
-  if (intstep .le. 0) then
+  if (nff .le. 0) then
      uflux = -uflux
      vflux = -vflux
   end if

@@ -3,7 +3,7 @@ module mod_write
 
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
-  USE mod_time 
+  USE mod_time
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -17,7 +17,7 @@ module mod_write
   LOGICAL                                    :: outdirdate = .true.
   LOGICAL                                    :: outdircase = .true.
   CHARACTER (LEN=30)                         :: yearstr
-  
+
 CONTAINS
 
 
@@ -39,18 +39,18 @@ CONTAINS
        write (yearstr(10:11),'(I2.2)') int(startHour)
        write (yearstr(12:13),'(I2.2)') int(startMin)
        outDataDir = trim(outDataDir)//trim(yearstr) // '/'
-    end if    
+    end if
     call system('mkdir -p ' // trim(outDataDir))
-    
+
   end subroutine setup_outdatadir
 
-  
+
   subroutine open_outfiles
 
     IMPLICIT NONE
     CHARACTER(LEN=200)                         :: fullWritePref
     CHARACTER(LEN=20)                          :: intminstamp='', partstamp=''
-    
+
     if ((intminInOutFile.eq.1) .or. (intminInOutFile.eq.3)) then
        write (intminstamp, '(A,i8.8)') '_t', intstart
     end if
@@ -179,17 +179,17 @@ CONTAINS
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
-    
+
     xf   = floor(x1)
     yf   = floor(y1)
     zf   = floor(z1)
-    
+
     !if ((sel .ne. 19) .and. (sel.ne.40)) then
        ! this requires too much memory
        !       vort = (vvel(xf+1,yf,zf)-vvel(xf-1,yf,zf))/4000 - &
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
-    
+
 subvol =  trj(5,ntrac)
 t0     =  trj(7,ntrac)
 #if defined tempsalt
@@ -197,7 +197,7 @@ t0     =  trj(7,ntrac)
 #endif
 
 !print *,x1,y1,z1
-    
+
 #if defined textwrite 
     select case (sel)
     case (10)
