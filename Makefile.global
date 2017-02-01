@@ -56,8 +56,10 @@ ifeq ($(F95COMPILER),"g95")
 endif
 
 ifeq ($(F95COMPILER),"ifort")
-        FF_FLAGS         = -O3 -c -cpp -convert big_endian
-        F90_FLAGS        = -free -assume nounderscore
+#       FF_FLAGS         = -O3 -c -cpp -convert big_endian
+        FF_FLAGS         = -O0 -c -cpp -convert big_endian -check uninit -ftrapuv -traceback -check bounds -fpe0 -g
+        F90_FLAGS        = -free
+#       F90_FLAGS        = -free -assume nounderscore
 	ARG_FLAGS       += -Tf
         FF              += $(LIB_DIR) $(INC_DIR) $(F90_FLAGS) $(ORM_FLAGS)
 endif
@@ -100,5 +102,6 @@ $(OBJDIR):
 .PHONY : clean
 clean :
 	-rm -rf build
+	-rm -rf *.mod
 	-rm $(RUNFILE)
 

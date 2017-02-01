@@ -64,9 +64,9 @@ SUBROUTINE readfields
   intpart2    = floor((ints)/24.)
   dstamp      = 'arctic2_avg_XXXX_XX_XX.nc'
 
-  write (dstamp(13:16),'(i4i2)') currYear
-  write(dstamp(18:19),'(i2.2)')  currMon
-  write(dstamp(21:22),'(i2.2)')  currDay
+  write (dstamp(13:16),'(i4.2)') currYear
+  write (dstamp(18:19),'(i2.2)') currMon
+  write (dstamp(21:22),'(i2.2)') currDay
 
   dataprefix  = trim(inDataDir) // dstamp
   tpos        = intpart1+1
@@ -114,7 +114,7 @@ SUBROUTINE readfields
      z_w(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt(:,:,k,2) = z_w(:,:,k,2)
 #else
-     dzt(:,:,k) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+     dzt(:,:,k,1) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
 #endif
   end do
 #ifdef zgrid3Dt
@@ -125,11 +125,11 @@ SUBROUTINE readfields
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
 #else
-  dzt0 = dzt(:,:,km)
-  dzt(:,:,1:km-1)=dzt(:,:,2:km)-dzt(:,:,1:km-1)
-  dzt(:,:,km) = ssh(:imt,:) - dzt0
-  dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:)*0.5 + dzt(2:imt,:,:)*0.5
-  dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:)*0.5 + dzt(:,2:jmt,:)*0.5
+  dzt0 = dzt(:,:,km,1)
+  dzt(:,:,1:km-1,1)=dzt(:,:,2:km,1)-dzt(:,:,1:km-1,1)
+  dzt(:,:,km,1) = ssh(:imt,:) - dzt0
+  dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,1)*0.5 + dzt(2:imt,:,:,1)*0.5
+  dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,1)*0.5 + dzt(:,2:jmt,:,1)*0.5
 #endif
 
   do k=1,km

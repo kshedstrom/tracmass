@@ -6,7 +6,7 @@ SUBROUTINE init_params
    USE mod_seed
    USE mod_grid
    USE mod_name
-   USE mod_time 
+   USE mod_time
    USE mod_domain
    USE mod_vel
    USE mod_traj
@@ -16,8 +16,8 @@ SUBROUTINE init_params
    USE mod_tracer
    USE mod_getfile
    USE mod_write
-   
-#if defined diffusion || turb 
+
+#if defined diffusion || turb
    USE mod_diffusion
 #endif
 #ifdef sediment
@@ -27,7 +27,7 @@ SUBROUTINE init_params
    IMPLICIT NONE
 
 !!----------------------------------------------------------------------------
-   
+
    INTEGER                                    ::  argint1 ,argint2
    INTEGER                                    ::  dummy ,factor ,i ,dtstep
    INTEGER                                    ::  gridVerNum ,runVerNum
@@ -47,13 +47,13 @@ SUBROUTINE init_params
                                     baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
                                     minvelJD, maxvelJD
-   namelist /INIT_START_DATE/       startSec, startMin, startHour,           & 
+   namelist /INIT_START_DATE/       startSec, startMin, startHour,           &
                                     startDay, startMon, startYear,           &
                                     startJD, intmin, noleap
    namelist /INIT_RUN_TIME/         intspin, intrun, seedintsdelta
    namelist /INIT_WRITE_TRAJS/      twritetype, kriva, outDataDir, outDataFile, &
                                     outdircase, intminInOutFile, intpsi, outdirdate
-          
+
    namelist /INIT_SEEDING/          nff, isec, idir, nqua, partQuant,        &
                                     ntracmax, loneparticle, SeedType, ist1,  &
                                     ist2, jst1, jst2, kst1, kst2, tst1, tst2,&
@@ -63,15 +63,15 @@ SUBROUTINE init_params
    namelist /INIT_KILLZONES/        nend, ienw, iene, jens, jenn, timax
    namelist /INIT_TEMP_SALT/        tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
                                     tmine, tmaxe, smine, smaxe, rmine, rmaxe
-#if defined diffusion || turb 
+#if defined diffusion || turb
    namelist /INIT_DIFFUSION/        ah, av
 #endif
 #ifdef sediment
    namelist /INIT_SEDIMENT/         partdiam, rhos, cwamp, twave, critvel
 #endif
 
-!!--------------------------------------------------------------------------  
-   
+!!--------------------------------------------------------------------------
+
    Project  = PROJECT_NAME
    Case     = CASE_NAME
 
@@ -81,7 +81,7 @@ SUBROUTINE init_params
    IF ((IARGC() > 1) )  THEN
       CALL getarg(2, Case)
    END IF
-   
+
    CALL getenv('TRMPROJDIR',projdir)
    if (len(trim(projdir)) == 0) then
       CALL getenv('TRMDIR',ormdir)
@@ -94,7 +94,7 @@ SUBROUTINE init_params
 
    OPEN (8,file=trim(projdir)//'/'//trim(Project)//'.in',    &
         & status='OLD', delim='APOSTROPHE')
-   ! -- Check if the namefiles has correct version number. 
+   ! -- Check if the namefiles has correct version number.
    READ (8,nml=INIT_NAMELIST_VERSION)
    IF (gridVerNum < 6) THEN
       PRINT *,'                     ERROR                     '
@@ -114,11 +114,11 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
-#if defined diffusion || turb 
+#if defined diffusion || turb
    READ (8,nml=INIT_DIFFUSION)
 #endif
 #ifdef sediment
-   READ (8,nml=INIT_SEDIMENT)   
+   READ (8,nml=INIT_SEDIMENT)
 #endif
    CLOSE (8)
 
@@ -144,31 +144,31 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
-#if defined diffusion || turb 
+#if defined diffusion || turb
    READ (8,nml=INIT_DIFFUSION)
 #endif
 #ifdef sediment
-   READ (8,nml=INIT_SEDIMENT)   
+   READ (8,nml=INIT_SEDIMENT)
 #endif
    CLOSE (8)
-      
+
    SELECT CASE (subGrid)
-   CASE (0)          
-      PRINT *,'Sub-grid    : Use the Full grid.'     
-      subGridImin =   1 
+   CASE (0)
+      PRINT *,'Sub-grid    : Use the Full grid.'
+      subGridImin =   1
       subGridJmin =   1
       subGridKmin =   1
       subGridImax = imt
-      subGridJmax = jmt 
-      subGridKmax = km 
+      subGridJmax = jmt
+      subGridKmax = km
    CASE (1)
       PRINT *,'Sub-grid    : ', subGridImin ,subGridImax, &
            &   subGridJmin ,subGridJmax
       imt = subGridImax-subGridImin
       jmt = subGridJmax-subGridJmin
 
-      
-	if (subGridKmax == 0) subGridKmax = km      
+
+	if (subGridKmax == 0) subGridKmax = km
 #if !defined(explicit_w) && !defined(twodim)
       if ((subGridKmax-subGridKmin+1) < km) then
       	print *, subGridKmax-subGridKmin+1, km
@@ -191,7 +191,7 @@ SUBROUTINE init_params
    count2d  = [1, 1,           imt,         jmt        ]
    start3d  = [1, subGridImin, subGridJmin, subGridKmin]
    count3d  = [1, imt,         jmt,         km         ]
-   
+
    if ((IARGC() > 2) )  then
       ARG_INT1 = 0.1
       CALL getarg(2,inparg)
@@ -203,7 +203,7 @@ SUBROUTINE init_params
          write( inargstr1, '(A,i9.9 )' ) '_a',int(ARG_INT1)
       end if
    end if
-      
+
    IF ((IARGC() > 3) ) THEN
       ARG_INT2 = 0.1
       CALL getarg(3,inparg)
@@ -215,19 +215,23 @@ SUBROUTINE init_params
          write( inargstr2, '(A,i9.9)' ) '_b',int(ARG_INT2)
       end if
    end if
-   
+
 #ifdef timeanalyt
       iter=1
 #endif
 
-      
+
+   print *, 'timax ', timax
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
+   print *, 'iter ', iter
    dstep    =  1.d0/dble(iter)
+   tseas= dble(ngcm)*3600.d0
+   print *, 'dstep ', dstep, tseas
    dtmin    =  dstep * tseas
-   baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)  + &  
+   baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)  + &
            ( dble((baseHour)*3600 + baseMin*60 + baseSec) / 86400 )
    if (startJD < 1) then
-      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &  
+      startJD  =  jdate(startYear ,startMon ,startDay) + 1 + &
            ( dble((startHour)*3600 + startMin*60 + startSec) / 86400 ) -baseJD
    else
       call  gdate (baseJD + startJD ,startYear , startMon ,startDay)
@@ -236,7 +240,7 @@ SUBROUTINE init_params
       startFrac = (startFrac - startHour) * 60
       startMin  = int(startFrac)
    end if
-   
+
    if (nff == 1) then
       intmin = jd2ints(startJD)
    else
@@ -244,7 +248,7 @@ SUBROUTINE init_params
    end if
 
    if (endJD < 1) then
-      endJD  =  jdate(endYear ,endMon ,endDay) + 1 + &  
+      endJD  =  jdate(endYear ,endMon ,endDay) + 1 + &
            ( dble((endHour)*3600 + endMin*60 + endSec) / 86400 ) -baseJD
    end if
    if (endJD < startJD) then
@@ -262,7 +266,7 @@ SUBROUTINE init_params
    else
       intmax = jd2ints(real(ceiling(endJD),8))
    end if
-   
+
    if (maxvelJD > 0) then
       minvelints = jd2ints(minvelJD)
       maxvelints = jd2ints(maxvelJD)
@@ -272,10 +276,10 @@ SUBROUTINE init_params
    tseas= dble(ngcm)*3600.d0
 
    ! --- ist -1 to imt ---
-   IF ( ist1 == -1) THEN 
+   IF ( ist1 == -1) THEN
       ist1 = IMT
    END IF
-   IF ( ist2 == -1) THEN 
+   IF ( ist2 == -1) THEN
       ist2 = IMT
    END IF
    ! --- jst -1 to jmt ---
@@ -284,12 +288,12 @@ SUBROUTINE init_params
    END IF
    IF ( jst2 == -1) THEN
       jst2=jmt
-   END IF 
+   END IF
    ! --- kst -1 to km ---
    IF ( kst1 == -1) THEN
       kst1 = KM
    END IF
-   IF ( kst2 == -1) THEN 
+   IF ( kst2 == -1) THEN
       kst2 = KM
    END IF
 
@@ -302,7 +306,7 @@ SUBROUTINE init_params
    end if
 
    call setup_outdatadir
-      
+
    if (outDataFile == '')  outdataFile = Case
 
 !!---------------------------------------------------------------------------
@@ -311,9 +315,9 @@ SUBROUTINE init_params
 
       ! --- Allocate information about the coordinates and grid ---
 
-      ALLOCATE ( csu (0:jmt), cst(jmt)  ) 
-      ALLOCATE ( phi(0:jmt),   zlev(0:km) ) 
-      ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) ) 
+      ALLOCATE ( csu (0:jmt), cst(jmt)  )
+      ALLOCATE ( phi(0:jmt),   zlev(0:km) )
+      ALLOCATE ( dyt(jmt), dxv(imt+2,jmt), dyu(imt+2,jmt) )
       ALLOCATE ( mask(imt,jmt) )
       mask = 1
       dyt = 0
@@ -327,10 +331,10 @@ SUBROUTINE init_params
 #ifdef varbottombox
       ALLOCATE ( dztb(imt,jmt,nst) )
 #endif /*varbottombox*/
-      ALLOCATE ( dxdy(imt,jmt) )   
+      ALLOCATE ( dxdy(imt,jmt) )
       ALLOCATE ( kmt(imt,jmt), dz(km) )
-    
-      ! --- Allocate velocity fields, temperature, salinity, density, --- 
+
+      ! --- Allocate velocity fields, temperature, salinity, density, ---
       ! --- sea-surface height, and trajectory data                   ---
       ALLOCATE ( uflux(imt,jmt,km,nst), vflux(imt,0:jmt,km,nst) )
       ALLOCATE ( hs(imt+1,jmt+1,nst) )
@@ -344,10 +348,10 @@ SUBROUTINE init_params
       vflux = 0.
       wflux = 0.d0
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
-      
+
       ! === Init mod_traj ===
       ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax) )
-      ALLOCATE ( nexit(NEND) ) 
+      ALLOCATE ( nexit(NEND) )
       nrj = 0
       trj = 0.d0
       nexit = 0
@@ -356,14 +360,14 @@ SUBROUTINE init_params
       if (nqua == 5 .AND. seedsubints(1)==-1) then
          print *,  "Error! "
          print *,  "At least one element in numseedsubints must be " // &
-                   "given when nqua=5 is used." 
+                   "given when nqua=5 is used."
          stop
       elseif  (nqua /= 5) then
          seedsubints(1) = 0
       end if
 
 #ifdef tempsalt
-      ALLOCATE ( tem(imt,jmt,km,nst) ) 
+      ALLOCATE ( tem(imt,jmt,km,nst) )
       ALLOCATE ( sal(imt,jmt,km,nst) )
       ALLOCATE ( rho(imt,jmt,km,nst) )
       tem = 0.

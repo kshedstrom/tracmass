@@ -53,7 +53,7 @@ SUBROUTINE setupgrid
   map2d    = [3, 4, 1, 2]
   map3d    = [2, 3, 4, 1]
 
-  gridfile =  "/Users/cdvestfals/Documents/arctic_gadids/grids/grid_Arctic_2.nc"
+  gridfile =  "/archive/u1/uaf/kate/gridpak/Arctic2/grid_Arctic_2.nc"
 
   ncTpos = 1
   print *, trim(gridfile)

@@ -1,6 +1,4 @@
-
-
-MODULE mod_precdef		! Precision definitions
+MODULE mod_precdef    ! Precision definitions
    !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
@@ -102,9 +100,12 @@ MODULE mod_grid
   ! === Vertical grids ===
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt, dzu, dzv
-  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0, dzu0, dzv0
-  REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzt
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu, dzv
+! REAL, ALLOCATABLE, DIMENSION(:,:,:,:)     :: dzu, dzv
+! REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu0, dzv0
+! REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0
+! REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
 #ifdef varbottombox 
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
@@ -116,12 +117,12 @@ MODULE mod_grid
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
   INTEGER                                   :: subGridKmin=1 ,subGridKmax=0
-  CHARACTER(LEN=200)                        :: SubGridFile 
+  CHARACTER(LEN=200)                        :: SubGridFile
   INTEGER                                   :: degrade_space=0
 
 #ifdef ifs
   REAL(DP), PARAMETER                       :: R_d = 287.05d0
-  REAL(DP), PARAMETER                       :: L_v = 2.5d0 * 1e+6   
+  REAL(DP), PARAMETER                       :: L_v = 2.5d0 * 1e+6
   REAL(DP), PARAMETER                       :: c_d = 1004.d0
 #endif
 
