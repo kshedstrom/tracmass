@@ -39,10 +39,10 @@ SUBROUTINE setupgrid
   INTEGER                                    :: i ,j ,k ,kk
   CHARACTER (len=200)                        :: gridfile
 
-
 ! === Template for setting up grids. Move the code from readfile.f95
   !allocate ( mask(imt,jmt), depth(imt,jmt) )  !FC
   allocate ( depth(imt,jmt) )  !FC
+  allocate ( ang(imt,jmt) )
   ALLOCATE ( z_r(imt,jmt,km,nst) )   !BJ
   ALLOCATE ( z_w(imt,jmt,0:km,nst) ) !BJ
 
@@ -57,14 +57,18 @@ SUBROUTINE setupgrid
 
   ncTpos = 1
   print *, trim(gridfile)
-  dxv(:,:) = 1./get2DfieldNC(trim(gridfile), 'pm')
-  dyu(:,:) = 1./get2DfieldNC(trim(gridfile), 'pn')
+  dxv(:,:) = get2DfieldNC(trim(gridfile), 'pm')
+  dyu(:,:) = get2DfieldNC(trim(gridfile), 'pn')
+  dxv(1:imt,1:jmt) = 1./dxv(1:imt,1:jmt)
+  dyu(1:imt,1:jmt) = 1./dyu(1:imt,1:jmt)
 
   dxdy = dyu*dxv
 
 
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
-  kmt = 50
+  ang = get2DfieldNC(trim(gridfile), 'angle')
+  ang = ang*pi/180.d0
+  kmt = km*mask
 
 end SUBROUTINE setupgrid

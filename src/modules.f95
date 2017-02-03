@@ -11,14 +11,14 @@ MODULE mod_param
   INTEGER                                   :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
   INTEGER                                   :: ncoor,kriva,iter,ngcm
-  REAL(DP), PARAMETER                       :: UNDEF=1.d20 
+  REAL(DP), PARAMETER                       :: UNDEF=1.d20
   REAL(DP), PARAMETER                       :: EPS=1.d-7 ! the small epsilon
 
   REAL(DP), PARAMETER                       :: grav = 9.81
   REAL(DP), PARAMETER                       :: PI = 3.14159265358979323846d0
-  REAL(DP), PARAMETER                       :: radius = 6371229.d0 
-  REAL(DP), PARAMETER                       :: radian = pi/180.d0  
-  REAL(DP), PARAMETER                       :: deg=radius*radian   
+  REAL(DP), PARAMETER                       :: radius = 6371229.d0
+  REAL(DP), PARAMETER                       :: radian = pi/180.d0
+  REAL(DP), PARAMETER                       :: deg=radius*radian
   REAL(DP), PARAMETER                       :: tday=24.d0 * 3600.d0
   INTEGER                                   :: idmax(12,1000:3000)
 ENDMODULE mod_param
@@ -29,7 +29,7 @@ MODULE mod_loopvars
   USE mod_precdef
   REAL(DP)                                  :: ds, dsmin
   REAL(DP)                                  :: dse, dsw, dsn, dss
-  REAL(DP)                                  :: dsu, dsd, dsc
+  REAL(DP)                                  :: dsu, dsd, dsc = 0.0
   LOGICAL                                   :: scrivi
   INTEGER                                   :: niter
   REAL(DP)                                  :: ss0
@@ -46,7 +46,7 @@ MODULE mod_traj
   INTEGER                                   :: ntrac, ntractot=0
   ! === Particle arrays ===
   REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj
   ! === Particle counters ===
   INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)         :: nexit
@@ -88,9 +88,10 @@ MODULE mod_grid
   INTEGER                                   :: nperio=1
   REAL(DP)                                  :: dx,dy
   REAL(DP)                                  :: dxdeg,dydeg,stlon1,stlat1
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: hs
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)   :: botbox
-  REAL*4, ALLOCATABLE, DIMENSION(:,:)     :: dxv, dyu, ang
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: ang
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: hs
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: botbox
+  REAL*4, ALLOCATABLE, DIMENSION(:,:)       :: dxv, dyu
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: dz
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: dxdy
   REAL(DP)                                  :: dxyz
@@ -106,7 +107,7 @@ MODULE mod_grid
 ! REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzu0, dzv0
 ! REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dzt0
 ! REAL, ALLOCATABLE, DIMENSION(:,:)         :: dzt0surf,dzu0surf,dzv0surf
-#ifdef varbottombox 
+#ifdef varbottombox
   REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: dztb
 #endif /*varbottombox*/
 #ifdef ifs
@@ -164,7 +165,7 @@ CONTAINS
        print *,'ERROR: Negative box volume                                '
        print *,'----------------------------------------------------------'
        print *,'dxdy = ', dxdy(ib,jb)
-       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb 
+       print *,'ib  = ', ib, ' jb  = ', jb, ' kb  = ', kb
        print *,'----------------------------------------------------------'
        print *,'The run is terminated'
        print *,'=========================================================='
@@ -188,7 +189,7 @@ MODULE mod_time
 
   !type for datetimes
   type DATETIME
-     REAL(DP)                               :: JD=0 
+     REAL(DP)                               :: JD=0
      REAL                                   :: frac=0, yd=0
      INTEGER                                :: Year, Mon, Day
      INTEGER                                :: Hour, Min, Sec
@@ -220,7 +221,7 @@ MODULE mod_time
   INTEGER                                   :: loopints, loopintstart
   REAL(DP)                                  :: loopJD, loopJDyr, loopFrac
   INTEGER                                   :: loopYear  ,loopMon  ,loopDay
-  INTEGER                                   :: loopHour, loopMin, loopSec 
+  INTEGER                                   :: loopHour, loopMin, loopSec
   ! Old stuff
   INTEGER                                   :: iyear ,imon ,iday ,ihour
   INTEGER                                   :: yearmin ,yearmax
@@ -238,7 +239,7 @@ MODULE mod_time
   REAL(DP)                                  :: intrpb, intrpbg
 CONTAINS
 
-  subroutine updateClock  
+  subroutine updateClock
     USE mod_param, only: ngcm
     IMPLICIT NONE
     ttpart = anint((anint(tt,8)/tseas-floor(anint(tt,8)/tseas))*tseas)/tseas
@@ -247,14 +248,14 @@ CONTAINS
     call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
                  currYear , currMon ,currDay)
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
-    
+
     if ((mod(currYear, 4) == 0)  .and. (currJDyr>56) .and.     &
          (currJDyr<(56 - leapoffset + ngcm/24.)) .and. noleap) then
        leapoffset = leapoffset + 1
        call  gdate (baseJD+currJDtot-1+jdoffset + leapoffset,  &
             currYear , currMon ,currDay)
     end if
-    
+
     currJDyr = baseJD + currJDtot - jdate(currYear ,1 ,1) + jdoffset
     currFrac = (currJDtot-dble(int(currJDtot,8)))*24
     currHour = int(currFrac,8)
@@ -281,15 +282,15 @@ CONTAINS
     LoopMin  = int(loopFrac,8)
     loopSec  = int((loopFrac - dble(loopMin)) * 60,8)
   end subroutine updateClock
-  
+
   subroutine gdate (rjd, year,month,day)
     !Computes the gregorian calendar date given a julian date (jd).
-    !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php            
+    !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
     REAL(DP)                                   :: rjd
     INTEGER                                  :: jd
     INTEGER                                  :: year ,month ,day
     INTEGER                                  :: i ,j ,k ,l ,n
-    
+
     jd = int(rjd)
     l= jd+68569
     n= 4*l/146097
@@ -301,7 +302,7 @@ CONTAINS
     l= j/11
     j= j+2-12*l
     i= 100*(n-49)+i+l
-    
+
     year= i
     month= j
     day= k
@@ -311,10 +312,10 @@ CONTAINS
   INTEGER function jd2ints(jd)
     USE mod_param, only: ngcm
     REAL(DP)                                    :: jd
-    jd2ints = int(floor((jd)/(real(ngcm)/24.))) 
+    jd2ints = int(floor((jd)/(real(ngcm)/24.)))
     return
   end function jd2ints
-  
+
   INTEGER function jdate (year, month, day)
     !Computes the julian date (JD) given a gregorian calendar date.
     !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
@@ -338,13 +339,13 @@ CONTAINS
     if(ds == dsmin) then ! transform ds to dt in seconds
        !            dt=dt  ! this makes dt more accurate
     else
-       dt = ds * dxyz 
+       dt = ds * dxyz
     endif
 #else
     if(ds == dsmin) then ! transform ds to dt in seconds
        dt=dtmin  ! this makes dt more accurate
     else
-       dt = ds * dxyz 
+       dt = ds * dxyz
     endif
 #endif /*regulardt*/
     if(dt.lt.0.d0) then
@@ -367,7 +368,7 @@ CONTAINS
        if(dt == dtmin) then
           ts=ts+dstep
           tss=tss+1.d0
-       elseif(dt == dtreg) then  
+       elseif(dt == dtreg) then
           ts=nint((ts+dtreg/tseas)*dble(iter), 8)/dble(iter)
           !                 ts=ts+dtreg/tseas
           tss=dble(nint(tss+dt/dtmin))
@@ -387,10 +388,10 @@ CONTAINS
 #endif /*regulardt*/
     end if
     ! === time interpolation constant ===
-#if defined fixedtimestep 
+#if defined fixedtimestep
     intrpbg=0.d0 ! mimics Ariane's lack of linear interpolation of the velocity fields
-#else    
-    intrpbg=dmod(ts,1.d0) 
+#else
+    intrpbg=dmod(ts,1.d0)
 #endif
     intrpb =1.d0-intrpbg
   end subroutine calc_time
@@ -415,11 +416,11 @@ ENDMODULE mod_domain
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_dens
   USE mod_precdef
 ENDMODULE mod_dens
-! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===        
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
@@ -432,13 +433,13 @@ MODULE mod_vel
 #else
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)        :: wflux
 #endif
-  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel 
+  REAL,   ALLOCATABLE, DIMENSION(:,:,:)      :: uvel ,vvel ,wvel
   REAL(DP)                                     :: ff
   INTEGER                                    :: degrade_time=0
     integer, save                            :: degrade_counter = 0
 
 CONTAINS
- 
+
   subroutine datasetswap
 
     USE  mod_grid, only      : nsm,nsp,hs
@@ -449,7 +450,7 @@ CONTAINS
     hs(:,:,nsm)      = hs(:,:,nsp)
     uflux(:,:,:,nsm) = uflux(:,:,:,nsp)
     vflux(:,:,:,nsm) = vflux(:,:,:,nsp)
-!    wflux(:,nsm) = wflux(:,nsp) 
+!    wflux(:,nsm) = wflux(:,nsp)
 #if  zgrid3D
     dzt(:,:,:,nsm)   = dzt(:,:,:,nsp)
 #endif
@@ -469,23 +470,23 @@ CONTAINS
     USE mod_grid, only: imt, jmt, km, nsm, nsp
     IMPLICIT none
     INTEGER                                    :: k
-    
+
     wflux(2:imt,2:jmt,1,nsp)    =  uflux(1:imt-1, 2:jmt,   1,   nsp)  -  &
                                    uflux(2:imt,   2:jmt,   1,   nsp)  +  &
-                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -  & 
+                                   vflux(2:imt,   1:jmt-2, 1,   nsp)  -  &
                                    vflux(2:imt,   2:jmt,   1,   nsp)
     wflux(1, 2:jmt,  1, nsp)    =  uflux(1,       2:jmt,   1,   nsp)  +  &
                                    vflux(1,       1:jmt-1, 1,   nsp)  -  &
                                    vflux(1,       2:jmt,   1,   nsp)
     wflux(2:imt, 1,  1, nsp)    =  uflux(1:imt-1, 1,       1,   nsp)  -  &
                                    uflux(2:imt,   1,       1,   nsp)  -  &
-                                   vflux(2:imt,   1,       1,   nsp) 
+                                   vflux(2:imt,   1,       1,   nsp)
     kloop: do k=2,km
        wflux(2:imt,2:jmt,k,nsp) =  wflux(2:imt,   2:jmt,   k-1, nsp)  +  &
                                    uflux(1:imt-1, 2:jmt,   k,   nsp)  -  &
                                    uflux(2:imt,   2:jmt,   k,   nsp)  +  &
-                                   vflux(2:imt,   1:jmt-1, k,   nsp)  -  & 
-                                   vflux(2:imt,   2:jmt,   k,   nsp) 
+                                   vflux(2:imt,   1:jmt-1, k,   nsp)  -  &
+                                   vflux(2:imt,   2:jmt,   k,   nsp)
        wflux(1,2:jmt,k,nsp)     =  wflux(1,       2:jmt,   k-1, nsp)  -  &
                                    uflux(1,       2:jmt,   k,   nsp)  +  &
                                    vflux(1,       1:jmt-1, k,   nsp)  -  &
@@ -493,7 +494,7 @@ CONTAINS
        wflux(2:imt,1,  k, nsp)  =  wflux(2:imt,   1,       k-1, nsp)  +  &
                                    uflux(1:imt-1, 1,       k,   nsp)  -  &
                                    uflux(2:imt,   1,       k,   nsp)  -  &
-                                   vflux(2:imt,   1,       k,   nsp) 
+                                   vflux(2:imt,   1,       k,   nsp)
     enddo kloop
   end subroutine calc_implicit_vertvel
 #endif /*full_wflux*/
@@ -534,7 +535,7 @@ MODULE mod_streamfunctions
 #ifdef tracer_convergence
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:)      :: converg
 #endif
-  INTEGER                                    :: intpsi=120 
+  INTEGER                                    :: intpsi=120
   ! to be read by the xxx.in files in future
 #ifdef streamts
   INTEGER, PARAMETER                        :: LOV=3
@@ -555,7 +556,7 @@ ENDMODULE mod_tracer
 
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-#if defined diffusion || turb 
+#if defined diffusion || turb
 !#ifdef diffusion
 MODULE mod_diffusion
   REAL                                       :: ah, av

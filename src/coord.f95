@@ -48,17 +48,16 @@ enddo
 rmin=19.d0
 rmax=28.5d0
 
-#if defined rco || baltix
+#if defined rco || defined baltix
 dx = 1./15.d0
 dy = 1./30.d0
-!stlon1= 9.0d0+0.25d0*dx
-!stlat1=53.8d0+1.25d0*dy
+stlon1= 9.0d0+0.25d0*dx
+stlat1=53.8d0+1.25d0*dy
 !print *,'coord stlon,stlat=',stlon1,stlat1
 rmin=-2.d0
 rmax=10.d0
-#endif
 
-#if defined for || sim
+#elif defined for || defined sim
 dx = 185.2d0/deg
 dy = dx
 #ifdef sim
@@ -71,9 +70,8 @@ stlat1=60.d0+ 8.d0/60.d0
 #endif
 rmin=-2.d0
 rmax=10.d0
-#endif
 
-#ifdef tes
+#elif defined tes
 dx = 1.d0
 dy = 1.d0
 stlon1=0.
@@ -82,26 +80,37 @@ rmin=20.d0
 rmax=30.d0
 smin= 0.d0
 smax=40.d0
-#endif
 
-#ifdef tun
+#elif defined tun
 dx = 1./32.d0
 dy = 1./32.d0
-stlon1=9.72d0-0.5d0*dx 
+stlon1=9.72d0-0.5d0*dx
 stlat1=32.5d0-0.5d0*dy
 rmin=20.d0
 rmax=30.d0
+#else
+dx = 1.d0
+dy = 1.d0
+stlon1=0.
+stlat1=0.
+rmin=5.d0
+rmax=10.d0
 #endif
 
 dr=(rmax-rmin)/dble(MR-1)
 
 ! Values for the Baltic 
-#if defined for || sim  
+#if defined for || defined sim  
 tmin=-2.d0
-tmax=25.d0 
+tmax=25.d0
 smin= 0.d0
 smax=15.d0
 ! Values for the world ocean but bad for brakish water
+#elif defined arctic_cod
+tmin=-2.d0
+tmax=15.d0
+smin= 0.d0
+smax=38.d0
 #else               
 tmin=-3. ; tmax=33
 smin=33. ; smax=38.

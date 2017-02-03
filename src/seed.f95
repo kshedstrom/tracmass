@@ -7,7 +7,7 @@ MODULE mod_seed
 !!          particles.
 !!
 !!          Populates matrices trj and nrj, containing information of
-!!          all particles. See init_par for allocation of them. 
+!!          all particles. See init_par for allocation of them.
 !!             trj        - Dimension NTRACMAX x NTRJ
 !!             nrj        - Dimension NTRACMAX x NNRJ
 !!
@@ -22,11 +22,11 @@ MODULE mod_seed
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
    IMPLICIT NONE
-  
+
    INTEGER                                    :: isec,  idir
    INTEGER                                    :: nqua, num, nsdMax
    INTEGER                                    :: nsdTim
-   INTEGER                                    :: seedtstep=1   
+   INTEGER                                    :: seedtstep=1
    INTEGER                                    :: seedPos, seedTime
    INTEGER                                    :: seedintsdelta = 1
    INTEGER                                    :: seedType
@@ -45,7 +45,7 @@ MODULE mod_seed
    integer                                    :: numseedsubints
    REAL, DIMENSION(50)                        :: seedsubints = -1
 
-  
+
 CONTAINS
 
    SUBROUTINE seed (tt,ts)
@@ -60,7 +60,7 @@ CONTAINS
 
      ! --------------------------------------------
      ! --- Check if ntime is in vector seed_tim ---
-     ! --------------------------------------------     
+     ! --------------------------------------------
       IF (seedTime == 2) THEN
          findTime: DO jsd=1,nsdTim
             IF (seed_tim(jsd) == ntime) THEN
@@ -73,11 +73,11 @@ CONTAINS
             END IF
          END DO findTime
       END IF
-      
+
       !What is this line for??? Seed every eight days!!!
       if ((ints-intstart-1)/seedintsdelta .ne. &
            real((ints-intstart-1))/seedintsdelta) return
-      
+
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---
       !----------------------------------------
@@ -96,7 +96,7 @@ CONTAINS
          IF (seedTime == 2 .AND. seedAll == 2) THEN
             itim  = seed_tim (jsd)
          END IF
-         
+
 #if defined baltix || defined rco
          ! -------------------------------------------------
          ! --- Test if it is time to launch the particle ---
@@ -108,8 +108,8 @@ CONTAINS
             PRINT*,'timeStart =',seedTime,' is not a valid configuration!'
             STOP
          END IF
-#endif         
-         vol = 0    
+#endif
+         vol = 0
          ib  = iist
          ibm = ib-1
          IF (ibm == 0) THEN
@@ -117,47 +117,47 @@ CONTAINS
          END IF
          jb  = ijst
          kb  = ikst
-         
+
          ! -----------------------------------------------------------
          ! --- Determine the volume/mass flux through the grid box ---
          ! -----------------------------------------------------------
          SELECT CASE (isec)
-         
+
             CASE (1)  ! Through eastern meridional-vertical surface
                vol = uflux (iist,ijst,ikst,nsm)
-         
+
             CASE (2)  ! Through northern zonal-vertical surface
                vol = vflux (iist,ijst,ikst,nsm)
-               
+
             CASE (3)  ! Through upper zonal-meridional surface
                CALL vertvel (1.d0,ib,ibm,jb,kb)
 #if defined explicit_w || full_wflux
                vol = wflux(ib,jb,kb,nsm)
 #elif twodim
                vol = 1.
-#else 
+#else
                vol=wflux(kb,nsm)
 #endif
-         
+
             CASE (4 ,5)   ! Total volume/mass of a grid box
                IF (KM+1-kmt(iist,ijst) > kb) THEN
                   CYCLE startLoop
                ELSE
-                  vol = abs(uflux (ib, jb, kb,nsm)) + abs(uflux (ibm, jb  , kb,nsm)) + & 
+                  vol = abs(uflux (ib, jb, kb,nsm)) + abs(uflux (ibm, jb  , kb,nsm)) + &
                   &     abs(vflux (ib, jb, kb,nsm)) + abs(vflux (ib , jb-1, kb,nsm))
-                  if(vol/=0.) vol = 1.  
+                  if(vol/=0.) vol = 1.
                ENDIF
                IF (vol == 0.d0) cycle startLoop
-         
+
             END SELECT
          ! If the particle is forced to move in positive/negative direction
          IF ( (idir*ff*vol <= 0.d0 .AND. idir /= 0 ) .OR. (vol == 0.) ) THEN
             CYCLE startLoop
          ENDIF
-      
-         ! Volume/mass transport needs to be positive   
+
+         ! Volume/mass transport needs to be positive
          vol = ABS (vol)
-      
+
          ! Calculate volume/mass of each individual trajectory
          IF (nqua == 3 .OR. isec > 4) THEN
 #if defined zgrid3D
@@ -178,7 +178,7 @@ CONTAINS
 !#endif /*freesurface*/
 
          END IF
-          
+
          ! Number of trajectories for box (iist,ijst,ikst)
          SELECT case (nqua)
             case (1)
@@ -196,7 +196,7 @@ CONTAINS
          IF (num == 0 .AND. nqua /= 4) THEN
             num=1
          END IF
-         ijt    = NINT (SQRT (FLOAT(num)) ) 
+         ijt    = NINT (SQRT (FLOAT(num)) )
          ikt    = NINT (FLOAT (num) / FLOAT (ijt))
          subvol = vol / DBLE (ijt*ikt)
 
@@ -208,41 +208,41 @@ CONTAINS
             print *, ' subvol : ',subvol
             STOP
          ENDIF
-         
+
          ! --------------------------------------------------
          ! --- Determine start position for each particle ---
          ! --------------------------------------------------
          subtimestepLoop: DO subtstep = 1, subtimesteps
             ijjLoop: DO jjt=1,ijt
-               kkkLoop: DO jkt=1,ikt          
+               kkkLoop: DO jkt=1,ikt
                   ib = iist
                   jb = ijst
                   kb = ikst
 
                   SELECT CASE (isec)
                   CASE (1)   ! Meridional-vertical section
-                     x1 = DBLE (ib) 
-                     y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt) 
+                     x1 = DBLE (ib)
+                     y1 = DBLE (jb-1) + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
                      IF (idir == 1) THEN
                         ib = iist+1
                      ELSE IF (idir == -1) THEN
-                        ib=iist 
+                        ib=iist
                      END IF
 
                   CASE (2)   ! Zonal-vertical section
                      x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
                      y1 = DBLE (jb)
-                     z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                     z1 = DBLE (kb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
                      IF (idir == 1) THEN
                         jb = ijst+1
                      ELSE IF (idir == -1) THEN
                         jb = ijst
                      END IF
 
-                  CASE (3)   ! Horizontal section                  
+                  CASE (3)   ! Horizontal section
                      x1 = DBLE (ibm)  + (DBLE (jjt) - 0.5d0) / DBLE (ijt)
-                     y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt) 
+                     y1 = DBLE (jb-1) + (DBLE (jkt) - 0.5d0) / DBLE (ikt)
                      z1 = DBLE (kb)
                      IF (idir == 1) THEN
                         kb = ikst+1
@@ -250,27 +250,27 @@ CONTAINS
                         kb = ikst
                      END IF
 
-                  CASE (4)   ! Spread evenly inside box                  
+                  CASE (4)   ! Spread evenly inside box
                      x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
                      y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
 
-                  CASE (5)                  
+                  CASE (5)
                      x1 = seed_xyz (jsd,1)
-                     y1 = seed_xyz (jsd,2) 
+                     y1 = seed_xyz (jsd,2)
                      z1 = seed_xyz (jsd,3)
 
                   END SELECT
                   ! ------------------------------------------------------
                   ! --- Check properties of water mass at initial time ---
-                  ! ------------------------------------------------------ 
+                  ! ------------------------------------------------------
 
-#ifdef tempsalt 
-                  CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1) 
+#ifdef tempsalt
+                  CALL interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
                   IF (temp < tmin0 .OR. temp > tmax0 .OR. &
                        &   salt < smin0 .OR. salt > smax0 .OR. &
                        &   dens < rmin0 .OR. dens > rmax0      ) THEN
-                     CYCLE kkkLoop 
+                     CYCLE kkkLoop
                   END IF
 #endif /*tempsalt*/
 
@@ -279,7 +279,7 @@ CONTAINS
                   ntrac = ntractot
 
                   ! Only one particle for diagnistics purposes
-                  if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
+                  if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then
                      nrj(6,ntrac)=1
                      cycle kkkLoop
                   endif
@@ -296,6 +296,7 @@ CONTAINS
                   nrj(7,ntrac)=1
 
                   !Save initial particle position
+                  print *, 'from seed', x1, y1, z1
                   call writedata(10) !ini
 
                END DO kkkLoop

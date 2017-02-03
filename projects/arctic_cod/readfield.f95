@@ -35,6 +35,9 @@ SUBROUTINE readfields
   REAL*8,       ALLOCATABLE, DIMENSION(:)    :: sc_r,Cs_r
   REAL*8,       ALLOCATABLE, DIMENSION(:)    :: sc_w,Cs_w
   INTEGER                                    :: hc
+#ifdef arctic_cod
+  REAL*8,       ALLOCATABLE, DIMENSION(:,:,:):: u_east,v_north
+#endif
 
   ! = Input fields from GCM
   REAL*8,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
@@ -49,6 +52,11 @@ SUBROUTINE readfields
   alloCondDZ: if(.not. allocated (dzu)) then
      allocate ( dzu(imt,jmt,km), dzv(imt,jmt,km) )
   end if alloCondDZ
+#ifdef arctic_cod
+  if(.not. allocated (u_east)) then
+     allocate ( u_east(imt,jmt,km), v_north(imt,jmt,km) )
+  end if
+#endif
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
   sc_r = 0
   Cs_r = 0
@@ -62,7 +70,7 @@ SUBROUTINE readfields
   ! === update the time counting ===
   intpart1    = mod(ints,24)
   intpart2    = floor((ints)/24.)
-  dstamp      = 'arctic2_avg_XXXX_XX_XX.nc'
+  dstamp      = 'arctic2_avg_XXXX-XX-XXT00:00:00.nc'
 
   write (dstamp(13:16),'(i4.2)') currYear
   write (dstamp(18:19),'(i2.2)') currMon
@@ -72,8 +80,23 @@ SUBROUTINE readfields
   tpos        = intpart1+1
   print *, "curr JD:", currJDtot, "read file:", dataprefix
 
+#ifdef arctic_cod
+  u_east    = get3DfieldNC(trim(dataprefix) ,  'u_eastward')
+  v_north   = get3DfieldNC(trim(dataprefix) , 'v_northward')
+! should be on cell centers here.
+  do k=1,km
+    uvel(:imt,:,k) = u_east(:,:,k)*cos(ang) + v_north(:,:,k)*sin(ang)
+    vvel(:imt,:,k) = -u_east(:,:,k)*sin(ang) + v_north(:,:,k)*cos(ang)
+  enddo
+! reusing arrays
+  u_east(1:imt-1,:,:)  = 0.5*(uvel(1:imt-1,:,:) + uvel(2:imt,:,:))
+  v_north(:,1:jmt-1,:) = 0.5*(vvel(:,1:jmt-1,:) + vvel(:,2:jmt,:))
+  uvel(:imt,:,:) = u_east
+  vvel(:imt,:,:) = v_north
+#else
   uvel      = get3DfieldNC(trim(dataprefix) ,   'u')
   vvel      = get3DfieldNC(trim(dataprefix) ,   'v')
+#endif
   ssh       = get2DfieldNC(trim(dataprefix) ,'zeta')
 #ifdef explicit_w
   wvel      = get3DfieldNC(trim(dataprefix) ,'omega')
@@ -125,11 +148,23 @@ SUBROUTINE readfields
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
 #else
-  dzt0 = dzt(:,:,km,1)
-  dzt(:,:,1:km-1,1)=dzt(:,:,2:km,1)-dzt(:,:,1:km-1,1)
-  dzt(:,:,km,1) = ssh(:imt,:) - dzt0
-  dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,1)*0.5 + dzt(2:imt,:,:,1)*0.5
-  dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,1)*0.5 + dzt(:,2:jmt,:,1)*0.5
+  do j=1,jmt
+    do i=1,imt
+      dzt0(i,j) = dzt(i,j,km,1)
+      dzt(i,j,1:km-1,1)=dzt(i,j,2:km,1)-dzt(i,j,1:km-1,1)
+      dzt(i,j,km,1) = ssh(i,j) - dzt0(i,j)
+    enddo
+  enddo
+  do j=1,jmt
+    do i=1,imt-1
+      dzu(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i+1,j,:,1)*0.5
+    enddo
+  enddo
+  do j=1,jmt-1
+    do i=1,imt
+      dzv(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i,j+1,:,1)*0.5
+    enddo
+  enddo
 #endif
 
   do k=1,km

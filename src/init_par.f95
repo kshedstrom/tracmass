@@ -221,12 +221,10 @@ SUBROUTINE init_params
 #endif
 
 
-   print *, 'timax ', timax
    timax    =  24.*3600.*timax ! convert time lengths from days to seconds
-   print *, 'iter ', iter
    dstep    =  1.d0/dble(iter)
+   tt       = 0.0
    tseas= dble(ngcm)*3600.d0
-   print *, 'dstep ', dstep, tseas
    dtmin    =  dstep * tseas
    baseJD   =  jdate(baseYear  ,baseMon  ,baseDay)  + &
            ( dble((baseHour)*3600 + baseMin*60 + baseSec) / 86400 )
