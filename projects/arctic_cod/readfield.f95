@@ -11,6 +11,7 @@ SUBROUTINE readfields
   USE mod_getfile
   USE mod_seed, only: nff! LD ADDED, for nff
 #ifdef tempsalt
+  USE mod_tempsalt
   USE mod_dens
 #endif
 
@@ -85,12 +86,14 @@ SUBROUTINE readfields
   v_north   = get3DfieldNC(trim(dataprefix) , 'v_northward')
 ! should be on cell centers here.
   do k=1,km
-    uvel(:imt,:,k) = u_east(:,:,k)*cos(ang) + v_north(:,:,k)*sin(ang)
-    vvel(:imt,:,k) = -u_east(:,:,k)*sin(ang) + v_north(:,:,k)*cos(ang)
+    uvel(:imt,:,k) = u_east(:,:,k)*cos(ang(:imt,:)) + &
+                     v_north(:,:,k)*sin(ang(:imt,:))
+    vvel(:imt,:,k) = -u_east(:,:,k)*sin(ang(:imt,:)) +&
+                     v_north(:,:,k)*cos(ang(:imt,:))
   enddo
 ! reusing arrays
   u_east(1:imt-1,:,:)  = 0.5*(uvel(1:imt-1,:,:) + uvel(2:imt,:,:))
-  v_north(:,1:jmt-1,:) = 0.5*(vvel(:,1:jmt-1,:) + vvel(:,2:jmt,:))
+  v_north(:imt,1:jmt-1,:) = 0.5*(vvel(:imt,1:jmt-1,:) + vvel(:imt,2:jmt,:))
   uvel(:imt,:,:) = u_east
   vvel(:imt,:,:) = v_north
 #else
@@ -128,7 +131,7 @@ SUBROUTINE readfields
   sc_r = get1DfieldNC (trim(dataprefix), 's_rho')
   hc   = getScalarNC (trim(dataprefix), 'hc')
 
-  z_w(:,:,0,2) = depth
+  z_w(:,:,0,2) = depth(:imt,:)
   do k=1,km
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
      z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)

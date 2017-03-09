@@ -1,5 +1,5 @@
 PROGRAM TRACMASS
- 
+
   USE mod_seed, only:  nqua, nff, num
   USE mod_grid, only:  dyu, dxv
   USE mod_time, only:  intmin, intstart, intend, intspin, intrun, intmax, &
@@ -9,7 +9,7 @@ PROGRAM TRACMASS
 #ifdef diffusion
   USE mod_diffusion
 #endif
-  
+
   IMPLICIT none
   INTEGER                                    :: i,j,n
 
@@ -17,9 +17,9 @@ PROGRAM TRACMASS
   call init_params
   call coordinat
   call writesetup_main
-  
+
   modrundirCond: if(nff == 1) then ! forward 
-     intstart =  intmin          
+     intstart =  intmin
      intend   =  intmax
   elseif(nff == 2) then ! backward
      intstart =  intmin+intrun
@@ -27,7 +27,7 @@ PROGRAM TRACMASS
      intend   =  intmin
      intspin  = -intspin
      intrun   = -intrun
-     nff      =  -1    
+     nff      =  -1
   end if modrundirCond
 
   call setupgrid
@@ -52,12 +52,12 @@ PROGRAM TRACMASS
   if(nqua.eq.1) then ! number of trajectories (per time resolution)
      ! num=NTRACMAX
      num = partQuant
-  elseif(nqua.eq.2) then 
-     voltr = partQuant 
-  elseif(nqua.eq.3) then 
+  elseif(nqua.eq.2) then
+     voltr = partQuant
+  elseif(nqua.eq.3) then
      voltr = partQuant
   end if
-  
+
   call open_outfiles
   call loop
   call close_outfiles

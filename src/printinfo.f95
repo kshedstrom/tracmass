@@ -19,12 +19,15 @@ module mod_print
   USE mod_streamfunctions
   USE mod_tracer
   USE mod_sed
+#if defined diffusion
+  USE mod_diffusion
+#endif
 
   implicit none
 
   CHARACTER(79)                       :: thinline, thickline
-  
- 
+
+
 CONTAINS
 
   subroutine lines()

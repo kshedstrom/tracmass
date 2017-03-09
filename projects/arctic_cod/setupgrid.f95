@@ -62,13 +62,15 @@ SUBROUTINE setupgrid
   dxv(1:imt,1:jmt) = 1./dxv(1:imt,1:jmt)
   dyu(1:imt,1:jmt) = 1./dyu(1:imt,1:jmt)
 
-  dxdy = dyu*dxv
+  dxdy(:,:) = dyu(:imt,:)*dxv(:imt,:)
 
 
+! print *, 'before', shape(depth), shape(ang)
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
   ang = get2DfieldNC(trim(gridfile), 'angle')
   ang = ang*pi/180.d0
   kmt = km*mask
+! print *, 'after', shape(depth), shape(ang)
 
 end SUBROUTINE setupgrid
