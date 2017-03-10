@@ -17,7 +17,7 @@ SUBROUTINE init_params
    USE mod_getfile
    USE mod_write
 
-#if defined diffusion || turb
+#if defined diffusion || defined turb
    USE mod_diffusion
 #endif
 #ifdef sediment
@@ -63,7 +63,7 @@ SUBROUTINE init_params
    namelist /INIT_KILLZONES/        nend, ienw, iene, jens, jenn, timax
    namelist /INIT_TEMP_SALT/        tmin0, tmax0, smin0, smax0, rmin0, rmax0,&
                                     tmine, tmaxe, smine, smaxe, rmine, rmaxe
-#if defined diffusion || turb
+#if defined diffusion || defined turb
    namelist /INIT_DIFFUSION/        ah, av
 #endif
 #ifdef sediment
