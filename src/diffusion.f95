@@ -28,14 +28,14 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
     tryAgain = .FALSE.
 
     ! Is particle within model area?
-    if(ib>=1 .AND. ib<=IMT .AND. jb>=1 .AND. jb<=JMT .AND. KM+1-kmt(ib,jb)<=kb .AND. kb>=1 ) then
+    if (ib>=1 .AND. ib<=IMT .AND. jb>=1 .AND. jb<=JMT .AND. KM+1-kmt(ib,jb)<=kb .AND. kb>=1 ) then
         tryAgain = .TRUE.
     else
      print *,'outside model domain in diffusion',ib,jb,KM+1-kmt(ib,jb),kb
 !     stop 86567
     end if
 !     print *,'ib,jb,kb',ib,jb,kb,kmt(ib,jb),x1,y1,z1
-    if(.NOT. tryAgain) then
+    if (.NOT. tryAgain) then
      print *,'ib,jb,kb',kmt(ib,jb),ib,jb,kb,x1,y1,z1
         write(*,*)"========"
             write(*,*)"Particle outside model area. No diffusion added."
@@ -86,17 +86,24 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
         endif
         if(tmpj>JMT) tmpj=JMT  ! stop 34956 ! north fold for orca grids
         if(tmpY>float(JMT)) tmpY=float(JMT)-0.1d0  ! stop 34956 ! north fold for orca grids
-#elif rco
+#elif defined rco
         ! Check if particle is on an open boundary
         if(tmpi==1 .AND. tmpj>=1 .AND. tmpj<=JMT .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
             tryAgain = .FALSE.
         end if
 #endif
+#ifdef roms
+        ! check that column is deep enough
+        if( 1<=tmpi .AND. tmpi<=IMT .AND. 1<=tmpj .AND. tmpj<=JMT .AND. kmt(tmpi,tmpj)>=tmpk .AND. tmpZ>=0 ) then
+            tryAgain = .FALSE. ! if false then a new position for the particle has been found and we exit the loop
+        end if
+#else
         ! check that column is deep enough
         if( 1<=tmpi .AND. tmpi<=IMT .AND. 1<=tmpj .AND. tmpj<=JMT .AND. KM+1-kmt(tmpi,tmpj)<=tmpk .AND. tmpk>=1 ) then
             tryAgain = .FALSE. ! if false then a new position for the particle has been found and we exit the loop
 !        print *,'hittat'
         end if
+#endif
 
         ! If tryAgain is still true, the particle is outside model area. The
         ! displacement is not saved, but we make a new try to displace.
@@ -105,7 +112,7 @@ SUBROUTINE diffuse(x1, y1, z1, ib, jb, kb, dt)
         if(itno>=100000 .AND. tryAgain) then
             tryAgain = .FALSE.
             write(*,*)"Particle stuck in infinite diffusion loop. No diffusion added.",ib,jb,kb
-            stop 34956
+!           stop 34956
             tmpX=x1 ; tmpY=y1 ; tmpZ=z1
             tmpi=ib ; tmpj=jb ; tmpk=kb
         end if

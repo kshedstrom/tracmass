@@ -124,8 +124,8 @@
            rmaxe =  500.0,
 /
 &INIT_DIFFUSION
-              ah = 2000.0,
-              av =    0.0,
+              ah =    0.0,
+              av =  0.001,
 /
 &INIT_SEDIMENT
         partdiam =  0.001,
