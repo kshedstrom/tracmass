@@ -114,7 +114,7 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
-#if defined diffusion || turb
+#if defined diffusion || defined turb
    READ (8,nml=INIT_DIFFUSION)
 #endif
 #ifdef sediment
@@ -144,7 +144,7 @@ SUBROUTINE init_params
    READ (8,nml=INIT_SEEDING)
    READ (8,nml=INIT_KILLZONES)
    READ (8,nml=INIT_TEMP_SALT)
-#if defined diffusion || turb
+#if defined diffusion || defined turb
    READ (8,nml=INIT_DIFFUSION)
 #endif
 #ifdef sediment

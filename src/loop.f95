@@ -32,6 +32,9 @@ SUBROUTINE loop
   USE mod_streamfunctions, only: intpsi
   USE mod_tracer
   USE mod_sed
+#ifdef turb
+  USE mod_turb
+#endif
 
   IMPLICIT none
 
@@ -304,7 +307,9 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/
            call active_niter
-           !call turbuflux(ia,ja,ka,dt)
+#ifdef turb
+           call turbuflux(ia,ja,ka,dt)
+#endif
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
 #ifdef timeanalyt

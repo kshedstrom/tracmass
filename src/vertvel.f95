@@ -1,6 +1,6 @@
 
 subroutine vertvel(ia,iam,ja,ka)
-  
+
   ! === Computes the vertical velocity by integrating ===
   ! === the continuity eq. from the bottom            ===
   ! === for the nsm and nsp velocity time steps       ===
@@ -12,19 +12,19 @@ subroutine vertvel(ia,iam,ja,ka)
   USE mod_sed
   USE mod_orbital
 #endif
-  
+
   IMPLICIT none
-    
+
   real*8                                     :: uu, um, vv, vm
   integer                                    :: ia, iam, ja, ka, k,n
   integer                                    :: n1, n2
 
-  REAL                                       :: kin 
-  
+  REAL                                       :: kin
+
 #if defined twodim || explicit_w
   return
 #else
-   
+
   n1=min(nsm,nsp)
   n2=max(nsm,nsp)
   kloop: do k=1,ka
@@ -32,8 +32,8 @@ subroutine vertvel(ia,iam,ja,ka)
      do n=n1,n2
         ! time change of the mass the in grid box
         wflux(k,n) = wflux(k-1,n) - ff * &
-             (  uflux(ia,ja,k,n) - uflux(iam, ja,   k, n)   & 
-              + vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n)   & 
+             (  uflux(ia,ja,k,n) - uflux(iam, ja,   k, n)   &
+              + vflux(ia,ja,k,n) - vflux(ia,  ja-1, k, n)   &
 #if defined ifs
               + (dzt(ia,ja,k,n2)-dzt(ia,ja,k,n1))*dxdy(ia,ja)/tseas )
 #else
@@ -70,10 +70,10 @@ enddo
 
 #endif
 
-#ifdef sediment  
+#ifdef sediment
   ! === Godtyckligt vaerde paa kinetiska energin ===
   ! === daer wsed inte laengre paaverkar, 3e6.   ===
-  
+
   k2loop: do k=0,km
      wsedtemp=0.d0
      kin=(uflux(ia,ja,k,nsm)*uflux(ia,ja,k,nsm)+ &
@@ -84,18 +84,18 @@ enddo
         wsedtemp=wsed*(kincrit-kin)/kincrit
      endif
 #ifdef explicit_w || full_wflux
-     wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja) 
+     wflux(k)=wflux(ia,ja,k,nsm) +  wsedtemp * dxdy(ia,ja)
 #else
     do n=n1,n2
      wflux(k,n)=wflux(k,n) +  wsedtemp * dxdy(ia,ja)
     enddo
 #endif
   end do k2loop
-#endif   
+#endif
 ! end sediment code
-  
+
   return
 
 end subroutine vertvel
 
- 
+
