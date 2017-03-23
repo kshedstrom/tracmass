@@ -32,7 +32,7 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   2005,
+        baseyear =   2012,
         jdoffset =      0,
 /
 &INIT_GRID_TIME
@@ -47,15 +47,15 @@
         startsec =      0,
         startmin =      0,
        starthour =      1,
-        startday =      1,
-        startmon =      1,
+        startday =     19,
+        startmon =      8,
        startyear =   2012,
          startjd =     -1,
           intmin =     -1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =     10,
+          intrun =     14,
 /
 &INIT_WRITE_TRAJS
       twritetype =      1,
@@ -66,7 +66,7 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing
-             kriva =      1,
+           kriva =      2,
       outdatadir =   '/center/d/kate/roms/tracmass/arctic_gadids/',
      outdatafile =   'PAROMS_test',
  intmininoutfile =      0,
@@ -77,7 +77,7 @@
             isec =      4,   ! seeding particle at center of T-box
             idir =      0,   ! following particles in both +/- direction
             nqua =      1,   ! constant number of particles in all boxes
-       partquant =     10,   ! ten particles released
+       partquant =      1,   ! ten particles released
         ntracmax =   2000000,
     loneparticle =     0,    ! was -1, LD has 0; not sure what numbers mean
         seedtype =     2,    ! using list to define what cells to seed
@@ -124,8 +124,8 @@
            rmaxe =  500.0,
 /
 &INIT_DIFFUSION
-              Ah =  0.001,
-              Av =  0.001,
+              Ah =  0.000,
+              Av =  0.000,
 /
 &INIT_SEDIMENT
         partdiam =  0.001,

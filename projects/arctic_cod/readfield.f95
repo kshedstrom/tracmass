@@ -136,17 +136,17 @@ SUBROUTINE readfields
      dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
      z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
-#ifdef zgrid3Dt
+#ifdef zgrid3D
      z_w(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
      dzt(:,:,k,2) = z_w(:,:,k,2)
 #else
      dzt(:,:,k,1) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
 #endif
   end do
-#ifdef zgrid3Dt
-  dzt0 = dzt(:,:,km,2)
+#ifdef zgrid3D
+  dzt0(:imt,:) = dzt(:,:,km,2)
   dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
-  dzt(:,:,km,2) = ssh(:imt,:) - dzt0
+  dzt(:,:,km,2) = ssh(:imt,:) - dzt0(:imt,:)
   dzt(:,:,:,1)=dzt(:,:,:,2)
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5

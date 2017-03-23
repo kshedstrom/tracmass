@@ -303,6 +303,7 @@ SUBROUTINE loop
                 1.d0 - tt/tseas*dble(iter) )
            dt=dtreg
            dsmin=dt/dxyz
+!          print *, 'dsmin', dsmin, dt, dxyz
 #else
            dsmin=dtmin/dxyz
 #endif /*regulardt*/
@@ -414,9 +415,9 @@ SUBROUTINE loop
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('bottomError', errCode)
-       !    if (errCode.ne.0) cycle ntracLoop
+       !   if (errCode.ne.0) cycle ntracLoop
            call errorCheck('airborneError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
+       !   if (errCode.ne.0) cycle ntracLoop
 
            call errorCheck('corrdepthError', errCode)
 !           if (errCode.ne.0) cycle ntracLoop

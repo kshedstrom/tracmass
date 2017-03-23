@@ -160,6 +160,7 @@ CONTAINS
 #endif /*freesurface*/
 #endif /*zgrid3D*/
     dxyz=dxyz*dxdy(ib,jb)
+!   print *, 'dxyz', dxyz, dxdy(ib,jb), ib, jb
     if (dxyz<0) then
        print *,'=========================================================='
        print *,'ERROR: Negative box volume                                '
