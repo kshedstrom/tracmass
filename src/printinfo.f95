@@ -40,9 +40,9 @@ CONTAINS
 
  subroutine print_header_main
     call lines
-    print *, thickline!================================================= 
+    print *, thickline!=================================================
     print *,'             TRACMASS lagrangian off-line particle tracking '
-    print *, thickline!================================================= 
+    print *, thickline!=================================================
   end subroutine print_header_main
 
 
@@ -58,10 +58,10 @@ CONTAINS
     print *,'Data surce  : '//trim(gridName)
     print *,'Run name    : '//trim(caseName)
     print *,'Description : '//trim(caseDesc)
-    print *, thinline !--------------------------------------------------- 
+    print *, thinline !---------------------------------------------------
     print *,'Directory for output files : ' ,trim(outDataDir)
     print *,'Prefix for output files    : ' ,trim(outDataFile)
-    print *, thinline !--------------------------------------------------- 
+    print *, thinline !---------------------------------------------------
     print *,"Selected compile options:"
 
 #if defined zgrid3Dt
@@ -69,8 +69,8 @@ CONTAINS
     print *,'   project Makefile.prj accordingly.'
     stop
 #endif
-    
-#ifdef timeanalyt 
+
+#ifdef timeanalyt
     print *,' - Analytical time scheme used to solve diff. Eqs.'
 #elif defined timestep
     print *,' - Stationary scheme used to solve  diff. Eqs.'
@@ -94,7 +94,7 @@ CONTAINS
 #if defined rerun
     print *,' - Rerun for Lagrangian stream functions'
 #endif
-#if defined twodim                                             
+#if defined twodim
     print *,' - Two-dimensional trajectories, no change in depth'
 #endif
 #if defined full_wflux
@@ -103,7 +103,7 @@ CONTAINS
 #if defined explicit_w
     print *,' - Explicit vertical velocities from the GCM.'
 #endif
-#if defined sediment                                             
+#if defined sediment
     print *,' - Sedimentation including resuspension activated'
 #endif
 
@@ -111,11 +111,11 @@ CONTAINS
 #if defined streamxy
     print *,' - Lagrangian horizontal stream function stored'
 #endif
-    
+
 #if defined streamv
     print *,' - Lagrangian vertical depth stream function stored'
 #endif
-    
+
 #if defined streamr
 #if defined streamts
 #if defined ifs
@@ -131,46 +131,46 @@ CONTAINS
 #if defined stream_thermohaline
     print *,' - Lagrangian thermohaline stream function stored'
 #endif
-    
+
 #if defined tracer
     print *,' - Lagrangian trajectory particle tracer stored'
 #endif
-    print *, thinline !--------------------------------------------------- 
+    print *, thinline !---------------------------------------------------
   end subroutine writesetup_main
 
-  
+
   subroutine print_start_loop()
     call lines
-    print *, thickline!================================================= 
+    print *, thickline!=================================================
     write(6,FMT='(A,I4,A,I2.2,A,I2.2,A,I2.2,A,I2.2)')          &
-         ' Start date in model-time     : ' , startYear, '-',  & 
+         ' Start date in model-time     : ' , startYear, '-',  &
          startMon, '-', startDay,' ' ,startHour, ':', startMin
   write(6,FMT='(A,I4,A,I2.2,A,I2.2,A,I2.2,A,I2.2)')          &
-         ' End date in model-time       : ' , endYear, '-',  & 
+         ' End date in model-time       : ' , endYear, '-',  &
          endMon, '-', endDay,' ' ,endHour, ':', endMin
     write(6,FMT='(A,I5)') ' Length of run in timesteps   : ' ,intrun
     write(6,FMT='(A,I5)') ' Number of seeding timesteps  : ' ,intspin
     write(6,FMT='(A,I5)') ' Steps between two GCM fields : ' ,iter
 
 
-    !write(6,FMT='(A,I7 A,I7 A,I7)') ' intstart : ',intstart, & 
+    !write(6,FMT='(A,I7 A,I7 A,I7)') ' intstart : ',intstart, &
     !                                ' intspin  : ',intspin,  &
     !                                ' intrun   : ',intrun
 
 !    print 999,intstart,intspin,intrun,intend,nff,num,voltr,&
 !         tmin0,tmax0,smin0,smax0,rmin0,rmax0
-  
+
 !999 format(' intstart :',i7, '   intspin :',i7, &
 !         /,'   intrun :',i7, '   intend  :',i7, &
-!         /,'   nff :',i2,   
+!         /,'   nff :',i2,
 !         /,'    voltr : ',f9.0,&
 !         /,'    tmin0 : ',f7.2,'  tmax0 : ',f7.2, &
 !         /,'    smin0 : ',f7.2,'  smax0 : ',f7.2,&
 !         /,'    rmin0 : ',f7.2,'  rmax0 : ',f7.2)
-    print *, thinline !--------------------------------------------------- 
-    print *,'t-step        run        out        err '  // & 
+    print *, thinline !---------------------------------------------------
+    print *,'t-step        run        out        err '  // &
             '       tot      dt      model date'
-    print *, thinline !--------------------------------------------------- 
+    print *, thinline !---------------------------------------------------
 
 
 
@@ -178,22 +178,22 @@ CONTAINS
 
   subroutine print_cycle_loop()
   ! === Timing ===
-    INTEGER, dimension(3)                      :: itimearray 
+    INTEGER, dimension(3)                      :: itimearray
     INTEGER                                    :: sysrate, sysmax
     INTEGER, save                              :: currclock, lastclock=0
-    REAL, dimension(2)                         :: wallarray 
+    REAL, dimension(2)                         :: wallarray
     REAL                                       :: walltime, walltot
     INTEGER                                    :: wallmin, wallsec
- 
+
 #ifdef sediment
-    print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout, & 
+    print 599,ints,ntime,ntractot,nout,nloop,nerror,ntractot-nout, &
          nsed,nsusp,nexit
-599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, & 
-         ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, & 
+599 format('ints=',i7,' time=',i10,' ntractot=',i8,' nout=',i8, &
+         ' nloop=',i4,' nerror=',i4,' in ocean/atm=',i8,' nsed=',i8, &
          ' nsusp=',i8,' nexit=',9i8)
 #elif defined ifs || rco || tes || orc || baltix || orca025  || orca025L75 || AusCOM
     print 799 ,ntime,ints ,ntractot ,nout ,nerror,ntractot-nout
-799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, & 
+799 format('ntime=',i10,' ints=',i7,' ntractot=',i8,' nout=',i8, &
          ' nerror=',i4,' in ocean/atm=',i8)
 #else
     call SYSTEM_CLOCK(currclock, sysrate, sysmax)
@@ -208,14 +208,14 @@ CONTAINS
     if (loneparticle>0) then
        print 798 ,ints-intstart ,trj(1,loneparticle) ,trj(2,loneparticle), &
             trj(3,loneparticle), nrj(6,loneparticle), wallmin, wallsec, loopYear, &
-            loopMon, loopDay, loopHour, loopMin 
+            loopMon, loopDay, loopHour, loopMin
     else
        print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
             wallmin, wallsec, loopYear, loopMon, loopDay, loopHour, loopMin
     end if
 798    format(i7, '|', F8.2,  '|', F8.2,  '|', F8.2,  '|', i10, ' | ',  &
             i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
-            i2.2, ':', i2.2)    
+            i2.2, ':', i2.2)
 799    format(i7, '|', i10,  '|', i10,  '|', i10,  '|', i10, ' | ',  &
             i2.2, ':', i2.2, ' | ', i4.4, '-', i2.2, '-', i2.2, ' ', &
             i2.2, ':', i2.2)
@@ -226,7 +226,7 @@ CONTAINS
   subroutine print_end_loop()
     character (len=15)                           :: currDate ,currTime
     call lines
-    print *, thickline!================================================= 
+    print *, thickline!=================================================
     print *,ntractot ,  ' particles calculated'
     print *,nout     ,  ' particles exited the space and time domain'
     print *,sum(nexit), ' particles exited through the boundaries'
@@ -234,19 +234,19 @@ CONTAINS
     print *,nsed     ,' trajectories sedimented'
     print *,nsusp    ,' trajectories resuspended'
     call writedata(19) !end
-    
+
 #endif
-#ifdef tempsalt     
+#ifdef tempsalt
     print *,nrh0,' particles outside density range'
 #endif
     print *,nloop,' infinite loops'
     print *,nerror,' particles flagged with errors'
     print *,ntractot-nout-nrh0-nerror,' particles in domain'
-    print *, thinline !--------------------------------------------------- 
+    print *, thinline !---------------------------------------------------
 
-#ifdef stremfunction     
+#ifdef stremfunction
     call writepsi
-#endif    
+#endif
 
     call date_and_time(currDate, currTime)
     print *,'End date  : '//currDate(1:4)//'-'//currDate(5:6)//'-'//currDate(7:8)

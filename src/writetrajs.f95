@@ -154,8 +154,9 @@ CONTAINS
     REAL                                 :: x14 ,y14 ,z14
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
-    REAL                                       :: temp, salt, dens
-    REAL                                       :: temp2, salt2, dens2
+    REAL                                 :: temp, salt, dens
+    REAL                                 :: temp2, salt2, dens2
+    REAL                                 :: lat, lon, zed
 #if defined for || sim
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -175,7 +176,7 @@ CONTAINS
          ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
 #else
 566 format(i8,i7,2f9.3,f6.2,2f10.2 &
-         ,f12.0,f6.1,f6.2,f6.2,f6.0,8e8.1 )
+         ,f12.0,f6.1,f6.2,f6.2,8f10.3 )
     !566 format(i7,i7,f7.2,f7.2,f7.1,f10.4,f10.4 &
     !         ,f13.4,f6.2,f6.2,f6.2,f6.0,8e8.1 )
 #endif
@@ -195,6 +196,7 @@ CONTAINS
       t0     =  trj(7,ntrac)
 #if defined tempsalt
       call interp2(ib,jb,kb,temp,salt,dens)
+      call interp_ll(ib,jb,kb,x1,y1,z1,lat,lon,zed,2)
 #endif
     endif
 
@@ -203,7 +205,8 @@ CONTAINS
 #if defined textwrite
     select case (sel)
     case (10)
-       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed
 !       if(temp==0.) stop 4867
     case (11)
        if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
@@ -221,9 +224,10 @@ CONTAINS
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
 #if defined tempsalt
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                        dens,lat,lon,zed
 #else
-          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,lat,lon,zed
 #endif
 #endif
        endif
@@ -244,11 +248,11 @@ CONTAINS
            call interp2(ib,jb,kb,temp,salt,dens)
 #endif
           write(56,566) ntrac,ints,x1,y1,z1, &
-               tt/tday,t0/tday,subvol,temp,salt,dens
+               tt/tday,t0/tday,subvol,temp,salt,dens,lat,lon,zed
        end if
     case (17)
        write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens
+            ,temp,salt,dens,lat,lon,zed
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc')

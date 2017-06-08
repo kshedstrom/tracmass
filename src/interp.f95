@@ -3,9 +3,9 @@
 subroutine interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,ns)
 
 !     computes temperature, salinity, density at position of trajectory
-!     by interpolating data from the center of eight nearest boxes  
+!     by interpolating data from the center of eight nearest boxes
 !
-!     This subroutine should be improved in order to include time interpolation   
+!     This subroutine should be improved in order to include time interpolation
 
 USE mod_grid
 USE mod_vel
@@ -22,7 +22,7 @@ REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
 REAL    :: temp,salt,dens
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
-! determining nearest centers of boxes 
+! determining nearest centers of boxes
       if(x1.le.dble(ib)-dble(.5)) then
        ip=ib
        im=ib-1
@@ -64,7 +64,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
       ay=(dble(jp)-y1)
       az=(dble(kp)-z1)
 
-! temperature, salinity, density calculation 
+! temperature, salinity, density calculation
 !      tppp=tem(ip,jp,kp,ns)
 !      if(tppp.eq.0.) tppp=tem(ib,jb,kb,ns)
 !      tppm=tem(ip,jp,kn,ns)
@@ -124,7 +124,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        sppp=sal(ip,jp,kn,ns)
        rppp=rho(ip,jp,kn,ns)
       endif
-      
+
       tppm=tem(ip,jp,kn,ns)
       sppm=sal(ip,jp,kn,ns)
       rppm=rho(ip,jp,kn,ns)
@@ -133,7 +133,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        sppm=sal(ip,jp,kn,ns)
        rppm=rho(ip,jp,kn,ns)
       endif
-      
+
       tpmp=tem(ip,jm,kp,ns)
       spmp=sal(ip,jm,kp,ns)
       rpmp=rho(ip,jm,kp,ns)
@@ -142,7 +142,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        spmp=sal(ip,jp,kn,ns)
        rpmp=rho(ip,jp,kn,ns)
       endif
-      
+
       tpmm=tem(ip,jm,kn,ns)
       spmm=sal(ip,jm,kn,ns)
       rpmm=rho(ip,jm,kn,ns)
@@ -151,7 +151,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        spmm=sal(ip,jp,kn,ns)
        rpmm=rho(ip,jp,kn,ns)
       endif
-      
+
       tmpp=tem(im,jp,kp,ns)
       smpp=sal(im,jp,kp,ns)
       rmpp=rho(im,jp,kp,ns)
@@ -160,7 +160,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        smpp=sal(ip,jp,kn,ns)
        rmpp=rho(ip,jp,kn,ns)
       endif
-      
+
       tmpm=tem(im,jp,kn,ns)
       smpm=sal(im,jp,kn,ns)
       rmpm=rho(im,jp,kn,ns)
@@ -169,7 +169,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        smpm=sal(ip,jp,kn,ns)
        rmpm=rho(ip,jp,kn,ns)
       endif
-      
+
       tmmp=tem(im,jm,kp,ns)
       smmp=sal(im,jm,kp,ns)
       rmmp=rho(im,jm,kp,ns)
@@ -178,7 +178,7 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
        smmp=sal(ip,jp,kn,ns)
        rmmp=rho(ip,jp,kn,ns)
       endif
-      
+
       tmmm=tem(im,jm,kn,ns)
       smmm=sal(im,jm,kn,ns)
       rmmm=rho(im,jm,kn,ns)
@@ -197,17 +197,17 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
         + tppm*(1.-ax)*(1.-ay)*    az  &
         + tmpm*    ax *(1.-ay)*    az  &
         + tpmm*(1.-ax)*    ay *    az  &
-        + tmmm*    ax *    ay *    az  
- 
-      salt=sppp*(1.-ax)*(1.-ay)*(1.-az) & 
+        + tmmm*    ax *    ay *    az
+
+      salt=sppp*(1.-ax)*(1.-ay)*(1.-az) &
         + smpp*    ax *(1.-ay)*(1.-az) &
-        + spmp*(1.-ax)*    ay *(1.-az) &  
+        + spmp*(1.-ax)*    ay *(1.-az) &
         + smmp*    ax *    ay *(1.-az) &
         + sppm*(1.-ax)*(1.-ay)*    az  &
         + smpm*    ax *(1.-ay)*    az  &
         + spmm*(1.-ax)*    ay *    az  &
-        + smmm*    ax *    ay *    az  
- 
+        + smmm*    ax *    ay *    az
+
       dens=rppp*(1.-ax)*(1.-ay)*(1.-az) &
         + rmpp*    ax *(1.-ay)*(1.-az) &
         + rpmp*(1.-ax)*    ay *(1.-az) &

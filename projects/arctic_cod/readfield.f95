@@ -131,44 +131,41 @@ SUBROUTINE readfields
   sc_r = get1DfieldNC (trim(dataprefix), 's_rho')
   hc   = getScalarNC (trim(dataprefix), 'hc')
 
-  z_w(:,:,0,2) = depth(:imt,:)
-  do k=1,km
-     dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
-     z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
-     dzt0 = (hc*sc_w(k) + depth*Cs_w(k)) / (hc + depth)
-#ifdef zgrid3Dt
-     z_w(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
-     dzt(:,:,k,2) = z_w(:,:,k,2)
-#else
-     dzt(:,:,k,1) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
-#endif
-  end do
-#ifdef zgrid3Dt
-  dzt0 = dzt(:,:,km,2)
-  dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
-  dzt(:,:,km,2) = ssh(:imt,:) - dzt0
   dzt(:,:,:,1)=dzt(:,:,:,2)
+
+  z_w(:,:,0,2) = depth(:imt,:)
+
+! dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
+  do k=1,km
+    dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
+    z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+    dzt(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
+  enddo
+  dzt0(:imt,:) = dzt(:,:,km,2)
+  dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
+  dzt(:,:,km,2) = ssh(:imt,:) - dzt0(:imt,:)
+
+! dzt(:,:,km,2) = ssh(:imt,:) - dzt0
+
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
-#else
-  do j=1,jmt
-    do i=1,imt
-      dzt0(i,j) = dzt(i,j,km,1)
-      dzt(i,j,1:km-1,1)=dzt(i,j,2:km,1)-dzt(i,j,1:km-1,1)
-      dzt(i,j,km,1) = ssh(i,j) - dzt0(i,j)
-    enddo
-  enddo
-  do j=1,jmt
-    do i=1,imt-1
-      dzu(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i+1,j,:,1)*0.5
-    enddo
-  enddo
-  do j=1,jmt-1
-    do i=1,imt
-      dzv(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i,j+1,:,1)*0.5
-    enddo
-  enddo
-#endif
+! do j=1,jmt
+!   do i=1,imt
+!     dzt0(i,j) = dzt(i,j,km,1)
+!     dzt(i,j,1:km-1,1)=dzt(i,j,2:km,1)-dzt(i,j,1:km-1,1)
+!     dzt(i,j,km,1) = ssh(i,j) - dzt0(i,j)
+!   enddo
+! enddo
+! do j=1,jmt
+!   do i=1,imt-1
+!     dzu(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i+1,j,:,1)*0.5
+!   enddo
+! enddo
+! do j=1,jmt-1
+!   do i=1,imt
+!     dzv(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i,j+1,:,1)*0.5
+!   enddo
+! enddo
 
   do k=1,km
      !uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu

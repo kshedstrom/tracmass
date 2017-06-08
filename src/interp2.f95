@@ -4,8 +4,8 @@ subroutine interp2(i,j,k,temp,salt,dens)
   ! === NO interpolation of the temperature, salinity, and density===
   ! === just their value at the centre of the T-box interpolated in time  ===
   ! === can be called as either ia,ja,ka or ib,jb,kb
-  ! === used to calculate the thermohaline stram function with -Dstream_thermohaline  
-  
+  ! === used to calculate the thermohaline stram function with -Dstream_thermohaline
+
   USE mod_grid
   USE mod_param
   USE mod_loopvars
@@ -14,12 +14,12 @@ subroutine interp2(i,j,k,temp,salt,dens)
   USE mod_dens
   USE mod_tempsalt
   IMPLICIT none
-  
+
   real temp,salt,dens
-  
+
   integer i,j,k
 
-  intrpbg=dmod(ts,1.d0) 
+  intrpbg=dmod(ts,1.d0)
   intrpb =1.d0-intrpbg
 
   temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)

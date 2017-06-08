@@ -113,7 +113,9 @@ MODULE mod_grid
 #ifdef ifs
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: aa, bb
 #endif
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv, depth
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: kmt, kmu, kmv
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: depth
+  REAL(DP), ALLOCATABLE, DIMENSION(:,:)     :: lat_rho, lon_rho
   INTEGER                                   :: subGrid     ,subGridID
   INTEGER                                   :: subGridImin ,subGridImax
   INTEGER                                   :: subGridJmin ,subGridJmax
@@ -268,7 +270,7 @@ CONTAINS
           loopints = ints - intmax * int(real(ints-intstart)/intmax)
        else
           loopints = ints - intmax * int(real(ints-minvelints)/intmax)
-          intmax = maxvelints - minvelints
+!         intmax = maxvelints - minvelints
        end if
     else
        loopints = ints

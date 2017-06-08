@@ -14,20 +14,20 @@ SUBROUTINE readfields
 #ifdef tempsalt
   USE mod_dens
 #endif
-  
+
   IMPLICIT none
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
-  ! = Variables for filename generation 
+  ! = Variables for filename generation
   CHARACTER                                  :: dates(62)*17
   CHARACTER (len=200)                        :: dataprefix, dstamp
   INTEGER                                    :: intpart1 ,intpart2
   INTEGER                                    :: ndates
   INTEGER                                    :: yr1 ,mn1 ,dy1,hr
   INTEGER                                    :: yr2 ,mn2 ,dy2
-  
+
   ! = Loop variables
   INTEGER                                    :: t ,i ,j ,k ,kk ,tpos
-  
+
   ! = Variables used for getfield procedures
   CHARACTER (len=200)                        :: gridFile ,fieldFile
   CHARACTER (len=50)                         :: varName
@@ -40,7 +40,7 @@ SUBROUTINE readfields
   REAL,       ALLOCATABLE, DIMENSION(:,:)    :: ssh,dzt0
   ! ===   ===   ===
 
-  
+
   alloCondUVW: if(.not. allocated (ssh)) then
      allocate ( ssh(imt,jmt), dzt0(imt,jmt) )
      allocate ( sc_r(km), Cs_r(km) )

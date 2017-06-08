@@ -43,6 +43,8 @@ SUBROUTINE setupgrid
   !allocate ( mask(imt,jmt), depth(imt,jmt) )  !FC
   allocate ( depth(imt,jmt) )  !FC
   allocate ( ang(imt,jmt) )
+  allocate ( lat_rho(imt,jmt) )
+  allocate ( lon_rho(imt,jmt) )
   ALLOCATE ( z_r(imt,jmt,km,nst) )   !BJ
   ALLOCATE ( z_w(imt,jmt,0:km,nst) ) !BJ
 
@@ -68,6 +70,8 @@ SUBROUTINE setupgrid
 ! print *, 'before', shape(depth), shape(ang)
   depth = get2DfieldNC(trim(gridfile), 'h')
   mask = get2DfieldNC(trim(gridfile), 'mask_rho')
+  lat_rho = get2DfieldNC(trim(gridfile), 'lat_rho')
+  lon_rho = get2DfieldNC(trim(gridfile), 'lon_rho')
   ang = get2DfieldNC(trim(gridfile), 'angle')
   ang = ang*pi/180.d0
   kmt = km*mask

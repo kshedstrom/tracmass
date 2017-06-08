@@ -402,9 +402,9 @@ SUBROUTINE loop
 
            ! === make sure that trajectory ===
            ! === is inside ib,jb,kb box    ===
-           if(x1 /= dble(idint(x1))) ib=idint(x1)+1
-           if(y1 /= dble(idint(y1))) jb=idint(y1)+1
-           if(z1 /= dble(idint(z1))) kb=idint(z1)+1
+           if (x1 /= dble(idint(x1))) ib=idint(x1)+1
+           if (y1 /= dble(idint(y1))) jb=idint(y1)+1
+           if (z1 /= dble(idint(z1))) kb=idint(z1)+1
 
            if (ja>jmt) ja = jmt - (ja - jmt)
            if (jb>jmt) jb = jmt - (jb - jmt)
@@ -414,9 +414,9 @@ SUBROUTINE loop
            call errorCheck('landError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('bottomError', errCode)
-       !    if (errCode.ne.0) cycle ntracLoop
+       !   if (errCode.ne.0) cycle ntracLoop
            call errorCheck('airborneError', errCode)
-           if (errCode.ne.0) cycle ntracLoop
+       !   if (errCode.ne.0) cycle ntracLoop
 
            call errorCheck('corrdepthError', errCode)
 !           if (errCode.ne.0) cycle ntracLoop
