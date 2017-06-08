@@ -135,7 +135,6 @@ SUBROUTINE readfields
 
   z_w(:,:,0,2) = depth(:imt,:)
 
-! dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
   do k=1,km
     dzt0 = (hc*sc_r(k) + depth*Cs_r(k)) / (hc + depth)
     z_r(:,:,k,2) = ssh(:imt,:) + (ssh(:imt,:) + depth(:imt,:)) * dzt0(:imt,:)
@@ -145,32 +144,11 @@ SUBROUTINE readfields
   dzt(:,:,1:km-1,2)=dzt(:,:,2:km,2)-dzt(:,:,1:km-1,2)
   dzt(:,:,km,2) = ssh(:imt,:) - dzt0(:imt,:)
 
-! dzt(:,:,km,2) = ssh(:imt,:) - dzt0
-
   dzu(1:imt-1,:,:) = dzt(1:imt-1,:,:,2)*0.5 + dzt(2:imt,:,:,2)*0.5
   dzv(:,1:jmt-1,:) = dzt(:,1:jmt-1,:,2)*0.5 + dzt(:,2:jmt,:,2)*0.5
-! do j=1,jmt
-!   do i=1,imt
-!     dzt0(i,j) = dzt(i,j,km,1)
-!     dzt(i,j,1:km-1,1)=dzt(i,j,2:km,1)-dzt(i,j,1:km-1,1)
-!     dzt(i,j,km,1) = ssh(i,j) - dzt0(i,j)
-!   enddo
-! enddo
-! do j=1,jmt
-!   do i=1,imt-1
-!     dzu(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i+1,j,:,1)*0.5
-!   enddo
-! enddo
-! do j=1,jmt-1
-!   do i=1,imt
-!     dzv(i,j,:) = dzt(i,j,:,1)*0.5 + dzt(i,j+1,:,1)*0.5
-!   enddo
-! enddo
 
   do k=1,km
-     !uflux(:,:,k,2)   = uvel(:,:,k) * dzu(:,:,k) * dyu
-     !vflux(:,:,k,2)   = vvel(:,:,k) * dzv(:,:,k) * dxv
-     uflux(:,:,k,2)   = uvel(:imt,:,k) * dzu(:,:,k) * dyu(:imt,:)
+     uflux(:,:,k,2)    = uvel(:imt,:,k) * dzu(:,:,k) * dyu(:imt,:)
      vflux(:,1:jmt,k,2)   = vvel(:imt,:,k) * dzv(:,:,k) * dxv(:imt,:)
   end do
 
