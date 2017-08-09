@@ -18,7 +18,8 @@ SUBROUTINE loop
   USE mod_loopvars, only: dse, dsw, dsmin, ds, dsu, dsd, dsn, dss, &
                           niter, lbas, scrivi, subvol
   USE mod_grid,     only: imt, jmt, km, kmt, dyu, dxv, dxdy, dxyz, dz, dzt, &
-                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio !joakim
+                          mask, iter, nsm, nsp, hs, calc_dxyz, nperio, lat, &
+                          lon,zed !joakim
   use mod_vel,      only: uflux, vflux, wflux
   USE mod_seed,     only: ff, nff, seedTime, seed
   USE mod_domain,   only: timax, jens, jenn, iene, ienw
@@ -27,7 +28,7 @@ SUBROUTINE loop
   USE mod_pos,      only: pos
   USE mod_print,    only: print_start_loop, print_cycle_loop, print_end_loop
   USE mod_tempsalt
-  ! === Selectable moules ===
+  ! === Selectable modules ===
   USE mod_active_particles
   USE mod_streamfunctions, only: intpsi
   USE mod_tracer
@@ -35,7 +36,9 @@ SUBROUTINE loop
 #ifdef turb
   USE mod_turb
 #endif
-
+#ifdef larval_fish
+  USE mod_fish
+#endif /*fish*/
   IMPLICIT none
 
   ! === Loop variables ===
@@ -43,7 +46,17 @@ SUBROUTINE loop
   ! === Variables to interpolate fields ===
   REAL                                       :: temp, salt, dens
   REAL                                       :: temp2, salt2, dens2
-  ! === Error Evaluation ===
+
+#ifdef larval_fish
+  ! Specific for fish code
+    REAL*8                                   :: hatchJD
+    REAL*8                                   :: age, egg_hatch, yolk_len, length
+    REAL*8                                   :: hatch_days, hatch_len
+    REAL*8                                   :: r1, r2, r, theta
+    INTEGER                                  :: clock
+#endif /*larval_fish*/
+
+! === Error Evaluation ===
   INTEGER                                    :: errCode
   INTEGER                                    :: landError=0, boundError=0
   REAL                                       :: zz
@@ -222,8 +235,14 @@ SUBROUTINE loop
            exit intsTimeLoop
         endif
 #endif /*rerun*/
+     call interp_ll(ib,jb,kb,x1,y1,z1,2)
+#ifdef larval_fish
+           ! Find settling velocity for active gridbox ===
+!           rhof = fish(ntrac,i_density)
+     call fishvel2(temp,salt,rho)
+#endif /*larval_fish*/
 
-        call active_ntrac(ntrac)
+     call active_ntrac(ntrac)
           ! ===  start loop for each trajectory ===
         scrivi=.true.
         niterLoop: do
@@ -286,7 +305,7 @@ SUBROUTINE loop
               tra(ia,ja,ka)=tra(ia,ja,ka)+real(subvol)
            end if
 #endif /*tracer*/
-           call writedata(11)
+     call writedata(11)
 
            !==============================================!
            ! calculate the 3 crossing times over the box  !
@@ -521,7 +540,7 @@ return
      subroutine errorCheck(teststr,errCode)
        CHARACTER (len=*),intent(in)        :: teststr
        INTEGER                             :: verbose = 1
-       INTEGER                             :: strict  = 1
+       INTEGER                             :: strict  = 0
        INTEGER,intent(out)                 :: errCode
        REAL, save                          :: dxmax = 0, dymax = 0
        INTEGER, save                       :: dxntrac, dyntrac
@@ -665,6 +684,7 @@ return
              call writedata(40)
              nrj(6,ntrac)=1
              if (strict==1) stop
+             !if (strict==0) stop
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -870,5 +890,5 @@ return
 !!$       write (6 , FMT="(A,F6.1,A)") ', done in ' ,timeDiff ,' sec'
 !!$    end select
   end subroutine fancyTimer
-end subroutine loop
+END SUBROUTINE loop
 

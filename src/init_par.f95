@@ -24,6 +24,9 @@ SUBROUTINE init_params
    USE mod_orbital
    USE mod_sed
 #endif
+#ifdef larval_fish
+  USE mod_fish
+#endif /*fish*/
    IMPLICIT NONE
 
 !!----------------------------------------------------------------------------
@@ -322,6 +325,12 @@ SUBROUTINE init_params
       dxv = 0
       dyu = 0
 
+#ifdef larval_fish
+!     ALLOCATE ( lat(imt,jmt), lon(imt,jmt) )
+      ALLOCATE ( srflux(imt,jmt,nst) )
+      ALLOCATE ( Hsbl(imt,jmt,nst) )
+#endif
+
 #if  zgrid3D
       ALLOCATE ( dzt(imt,jmt,km,nst) )
       dzt = 0
@@ -373,8 +382,17 @@ SUBROUTINE init_params
       rho = 0.
 #endif
 #ifdef fishvel
-      ALLOCATE ( akt(imt,jmt,km,nst) )
-      ALLOCATE ( ak2(imt,jmt,km) )
+      ALLOCATE (akt(imt,jmt,km,nst) )
+      ALLOCATE (ak2(imt,jmt,km) )
+#endif
+#ifdef larval_fish
+      ALLOCATE ( fish(ntracmax, nfish_var) )
+      ALLOCATE ( stage(ntracmax) )
+      stage = f_egg
+      fish(:, i_jd) = 0.00
+      fish(:, i_hatchtime) = 0.00
+      fish(:, i_hatchlength) = 0.0
+      fish(:, i_length) = 0.0
 #endif
 
       ! --- Allocate Lagrangian stream functions ---

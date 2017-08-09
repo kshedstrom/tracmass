@@ -8,9 +8,9 @@ ENDMODULE mod_precdef
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
   USE mod_precdef
-  INTEGER                                   :: jmax, ntracmax
+  INTEGER                                                :: jmax, ntracmax
   INTEGER, PARAMETER                        :: MR=501 ! or 1001
-  INTEGER                                   :: ncoor,kriva,iter,ngcm
+  INTEGER                                                :: ncoor,kriva,iter,ngcm
   REAL(DP), PARAMETER                       :: UNDEF=1.d20
   REAL(DP), PARAMETER                       :: EPS=1.d-7 ! the small epsilon
 
@@ -20,7 +20,7 @@ MODULE mod_param
   REAL(DP), PARAMETER                       :: radian = pi/180.d0
   REAL(DP), PARAMETER                       :: deg=radius*radian
   REAL(DP), PARAMETER                       :: tday=24.d0 * 3600.d0
-  INTEGER                                   :: idmax(12,1000:3000)
+  INTEGER                                                :: idmax(12,1000:3000)
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -35,6 +35,8 @@ MODULE mod_loopvars
   REAL(DP)                                  :: ss0
   INTEGER                                   :: lbas
   REAL(DP)                                  :: subvol
+  REAL(DP)                                  :: intrpr, intrpg
+!REAL*8                                     :: rr, rb, rg, rbg from EBS_pollock
 ENDMODULE mod_loopvars
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -69,15 +71,15 @@ MODULE mod_tempsalt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: akt
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: ak2
 #endif
-  REAL*4                                    :: tmin0 ,tmax0
-  REAL*4                                    :: smin0 ,smax0
-  REAL*4                                    :: rmin0 ,rmax0
-  REAL*4                                    :: tmine ,tmaxe
-  REAL*4                                    :: smine ,smaxe
-  REAL*4                                    :: rmine ,rmaxe
+  REAL*4                                  :: tmin0 ,tmax0
+  REAL*4                                  :: smin0 ,smax0
+  REAL*4                                  :: rmin0 ,rmax0
+  REAL*4                                  :: tmine ,tmaxe
+  REAL*4                                  :: smine ,smaxe
+  REAL*4                                  :: rmine ,rmaxe
 end MODULE mod_tempsalt
 
-  ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_grid
@@ -101,6 +103,10 @@ MODULE mod_grid
   REAL(DP)                                  :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: csu,cst,dyt,phi
+  REAL(DP)                                  :: lat, lon, zed
+#ifdef larval_fish
+  REAL, ALLOCATABLE, DIMENSION(:,:,:)       :: srflux, Hsbl
+#endif
 
   ! === Vertical grids ===
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
@@ -292,7 +298,7 @@ CONTAINS
   subroutine gdate (rjd, year,month,day)
     !Computes the gregorian calendar date given a julian date (jd).
     !Source: http://aa.usno.navy.mil/faq/docs/JD_Formula.php
-    REAL(DP)                                   :: rjd
+    REAL(DP)                                 :: rjd
     INTEGER                                  :: jd
     INTEGER                                  :: year ,month ,day
     INTEGER                                  :: i ,j ,k ,l ,n
@@ -431,9 +437,18 @@ ENDMODULE mod_dens
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_vel
-  USE mod_grid, only: nsm, nsp, dzt
+  USE mod_grid, only: nsm, nsp, dzt! , nst
   USE mod_precdef
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
+#ifdef larval_fish
+  !INTEGER                                  :: nst=2
+  !REAL                                     :: zed
+  REAL                                      :: depth1, flen1
+  REAL                                      :: light, srflx
+  REAL                                      :: hsblx
+  REAL                                      :: depth2(2),srflx2(2),hsblx2(2)
+#endif
+
 #if defined explicit_w || full_wflux
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: wflux
 #else
@@ -449,6 +464,9 @@ CONTAINS
   subroutine datasetswap
 
     USE  mod_grid, only      : nsm,nsp,hs
+#ifdef larval_fish
+    USE mod_grid, only       : srflux, Hsbl
+#endif
     USE  mod_tempsalt, only  : tem,sal,rho
 
     IMPLICIT NONE
@@ -467,6 +485,10 @@ CONTAINS
     tem(:,:,:,nsm)   = tem(:,:,:,nsp)
     sal(:,:,:,nsm)   = sal(:,:,:,nsp)
     rho(:,:,:,nsm)   = rho(:,:,:,nsp)
+#endif
+#ifdef larval_fish
+    srflux(:,:,nsm)  = srflux(:,:,nsp)
+    Hsbl(:,:,nsm)    = Hsbl(:,:,nsp)
 #endif
   end subroutine datasetswap
 
@@ -570,6 +592,28 @@ ENDMODULE mod_diffusion
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+
+! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
+!#ifdef larval_fish
+MODULE mod_fish
+#ifdef larval_fish
+  REAL*8 :: wfish
+  REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: fish
+  INTEGER, ALLOCATABLE, DIMENSION(:)           :: stage
+  INTEGER, parameter :: nfish_var = 4
+  REAL*8, parameter  :: fishdiam = 1.715 ! used mean egg diameter from Matarese et al. 1989
+  INTEGER, parameter :: f_egg = 1
+  INTEGER, parameter :: f_yolk = 2
+  INTEGER, parameter :: f_post = 3
+  INTEGER, parameter :: f_ejuv = 4
+  INTEGER, parameter :: f_ljuv = 5
+  INTEGER, parameter :: i_jd = 1
+  INTEGER, parameter :: i_hatchtime = 2
+  INTEGER, parameter :: i_hatchlength = 3
+  INTEGER, parameter :: i_length = 4
+#endif
+ENDMODULE mod_fish
+!#endif
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_sed
