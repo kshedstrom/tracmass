@@ -64,13 +64,17 @@ MODULE mod_tempsalt
   REAL(DP)                                  :: rmin, tmin, smin
   REAL(DP)                                  :: rmax, tmax, smax
   REAL(DP)                                  :: dr ,dtemp ,dsalt
-  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: tem,sal,rho
-  REAL*4                                  :: tmin0 ,tmax0
-  REAL*4                                  :: smin0 ,smax0
-  REAL*4                                  :: rmin0 ,rmax0
-  REAL*4                                  :: tmine ,tmaxe
-  REAL*4                                  :: smine ,smaxe
-  REAL*4                                  :: rmine ,rmaxe
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: tem,sal,rho
+#ifdef fishvel
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)   :: akt
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:)     :: ak2
+#endif
+  REAL*4                                    :: tmin0 ,tmax0
+  REAL*4                                    :: smin0 ,smax0
+  REAL*4                                    :: rmin0 ,rmax0
+  REAL*4                                    :: tmine ,tmaxe
+  REAL*4                                    :: smine ,smaxe
+  REAL*4                                    :: rmine ,rmaxe
 end MODULE mod_tempsalt
 
   ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===

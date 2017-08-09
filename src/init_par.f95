@@ -372,6 +372,10 @@ SUBROUTINE init_params
       sal = 0.
       rho = 0.
 #endif
+#ifdef fishvel
+      ALLOCATE ( akt(imt,jmt,km,nst) )
+      ALLOCATE ( ak2(imt,jmt,km) )
+#endif
 
       ! --- Allocate Lagrangian stream functions ---
 #ifdef streamxy
