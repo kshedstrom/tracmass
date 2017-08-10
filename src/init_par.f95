@@ -382,7 +382,7 @@ SUBROUTINE init_params
       rho = 0.
 #endif
 #ifdef fishvel
-      ALLOCATE (akt(imt,jmt,km,nst) )
+      ALLOCATE (akt(imt,jmt,0:km,nst) )
       ALLOCATE (ak2(imt,jmt,km) )
 #endif
 #ifdef larval_fish

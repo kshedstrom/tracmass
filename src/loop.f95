@@ -236,10 +236,11 @@ SUBROUTINE loop
         endif
 #endif /*rerun*/
      call interp_ll(ib,jb,kb,x1,y1,z1,2)
+     call interp (ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
 #ifdef larval_fish
            ! Find settling velocity for active gridbox ===
 !           rhof = fish(ntrac,i_density)
-     call fishvel2(temp,salt,rho)
+     call fishvel2(temp,salt,dens)
 #endif /*larval_fish*/
 
      call active_ntrac(ntrac)

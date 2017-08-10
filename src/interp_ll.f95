@@ -1,4 +1,4 @@
-subroutine interp_ll(ib,jb,kb,x1,y1,z1,lat,lon,zed,ns)
+subroutine interp_ll(ib,jb,kb,x1,y1,z1,ns)
 
 !     computes temperature, salinity, density at position of trajectory
 !     by interpolating data from the center of eight nearest boxes
@@ -14,7 +14,6 @@ REAL*8  :: x1,y1,z1,ax,ay,az
 REAL    :: tpp,tpm,tmp,tmm
 REAL    :: spp,spm,smp,smm
 REAL    :: rppp,rppm,rpmp,rpmm,rmpp,rmpm,rmmp,rmmm
-REAL    :: lat,lon,zed
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,ns
 ! determining nearest centers of boxes

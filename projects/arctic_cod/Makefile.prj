@@ -41,9 +41,9 @@
 #  fl26  = -Dcoarse         # Adds a diffusion on trajectory
 #------------------------------------------------------------------------
    fl27  = -Dregional       # Turns off periodic wrapping
-#   fl28  = -Dlarval_fish    # Larval fish biology
+   fl28  = -Dlarval_fish    # Larval fish biology
 #  fl29  = -Dlarval_vert    # Larval fish binned vertical random walk
-#   fl30  = -Dfishvel        # Larval fish active vertical behavior
+   fl30  = -Dfishvel        # Larval fish active vertical behavior
 #------------------------------------------------------------------------
    fl31  = -Droms           # Check for how ROMS does stuff for diffusion
 #========================================================================

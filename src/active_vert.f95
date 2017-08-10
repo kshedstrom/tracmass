@@ -3,14 +3,15 @@
  ! Subroutine for active vertical behavior of particles
  !=======================================================================
 
- SUBROUTINE active_vert(z1)
+ SUBROUTINE active_vert
 
  USE mod_param
  USE mod_loopvars
  USE mod_fish
+ USE mod_traj
  IMPLICIT none
 
- REAL*8   :: length, z_day, z_nit, wmax, wfish
+ REAL*8   :: length, z_day, z_nit, wmax
  REAL*8   :: light
 
  !----------Calc light from lon and lat-----------------
@@ -19,7 +20,7 @@
  length = fish(ntrac,i_length)
  wfish=0.0
 
- If (stage(ntrac) .eq. f_pre)then
+ If (stage(ntrac) .eq. f_yolk)then
     z_day = -10.
     z_nit = -10.
  ElseIf (stage(ntrac) .eq. f_post)then
@@ -35,7 +36,7 @@
 
  wmax = -length*0.5E-3
  !If(light > 0.0)then
-    wfish = wmax *( - tanh(0.2*(z1(ib,jb,kb) - z_day)))
+    wfish = wmax *( - tanh(0.2*(z1 - z_day)))
  !Else
     !wfish = wmax *( - tanh(0.2*(z1(ib,jb,kb) - z_nit)))
  !Endif

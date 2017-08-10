@@ -67,7 +67,7 @@
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing
            kriva =      2,
-      outdatadir =   '/center1/d/kate/roms/tracmass/arctic_gadids/',
+      outdatadir =   '/u1/uaf/kshedstrom/roms/tracmass/arctic_gadids/',
      outdatafile =   'PAROMS_test',
  intmininoutfile =      0,
           intpsi =    120,
@@ -92,7 +92,7 @@
             kst2 =     5,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =     '/center1/d/kate/roms/tracmass/projects/arctic_cod/',
+         seeddir =     '/u1/uaf/kshedstrom/roms/tracmass/projects/arctic_cod/',
         seedfile =     'test_seed.csv',
      varseedfile =      0,
         seedTime =      0,

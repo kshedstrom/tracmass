@@ -52,7 +52,7 @@
  REAL*8   :: hatch_days, hatch_len, g
  REAL*8   :: r1, r2, r, theta
  REAL*8   :: wmax, zday, znit
- REAL*8   :: temp, salt, rho
+ REAL     :: temp, salt, rho
  INTEGER  :: clock, seed
  !DOUBLE PRECISION, PARAMETER :: PI=3.141592653589793238462
 
@@ -67,9 +67,9 @@
  If (stage(ntrac) .eq. f_egg)then
    !Time to hatch
    egg_hatch = fish(ntrac,i_hatchtime)
-   hatch_days = 28.2817+20.7194*exp(-0.5590*temp) !days to hatch at current temp
-   egg_hatch = egg_hatch + (1.0 / hatch_days) * dtmin/tday !accum time to hatch in days
-   !egg_hatch=1  ! for simulations starting from hatching locations, comment out formula for egg hatch, use 1 instead
+!   hatch_days = 28.2817+20.7194*exp(-0.5590*temp) !days to hatch at current temp
+!   egg_hatch = egg_hatch + (1.0 / hatch_days) * dtmin/tday !accum time to hatch in days
+   egg_hatch = egg_hatch + 1  ! for simulations starting from hatching locations, comment out formula for egg hatch, use 1 instead
    fish(ntrac,i_hatchtime) = egg_hatch
 
    If (egg_hatch .ge. 1)then

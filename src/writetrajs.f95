@@ -4,12 +4,14 @@ module mod_write
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time
+  USE mod_param
+  USE mod_vel
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
   INTEGER                                    :: intminInOutFile
   CHARACTER(LEN=200)                         :: outDataDir, outDataFile
-  CHARACTER (LEN=200)                        ::  projdir="", ormdir=""
+  CHARACTER (LEN=200)                        :: projdir="", ormdir=""
   CHARACTER(LEN=200)                         :: inargstr1='', inargstr2=''
   INTEGER                                    :: twritetype = 0
   INTEGER                                    :: fileseq = 0
@@ -139,11 +141,13 @@ CONTAINS
 
   subroutine writedata(sel)
     USE mod_time
-    USE mod_pos
     USE mod_traj
     USE mod_loopvars
     USE mod_name
-
+    USE mod_grid
+#ifdef larval_fish
+    USE mod_fish
+#endif
     IMPLICIT NONE
 
     REAL                                 :: vort
@@ -156,7 +160,6 @@ CONTAINS
     ! === Variables to interpolate fields ===
     REAL                                 :: temp, salt, dens
     REAL                                 :: temp2, salt2, dens2
-    REAL                                 :: lat, lon, zed
 #if defined for || sim
 566 format(i8,i7,f7.2,f7.2,f7.1,f10.2,f10.2 &
          ,f10.1,f6.2,f6.2,f6.2,f6.0,8e8.1 )
@@ -196,17 +199,24 @@ CONTAINS
       t0     =  trj(7,ntrac)
 #if defined tempsalt
       call interp2(ib,jb,kb,temp,salt,dens)
-      call interp_ll(ib,jb,kb,x1,y1,z1,lat,lon,zed,2)
+      call interp_ll(ib,jb,kb,x1,y1,z1,2)
 #endif
     endif
 
 !print *,x1,y1,z1
 
 #if defined textwrite
+    print *, "printing sel", sel
     select case (sel)
     case (10)
+# ifdef larval_fish
+       flen1 = fish(ntrac,i_length)
+       write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed,flen1!,light
+# else
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
                      dens,lat,lon,zed
+# endif
 !       if(temp==0.) stop 4867
     case (11)
        if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
@@ -214,8 +224,8 @@ CONTAINS
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
             (kriva == 5 .AND.                                  &
-          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
-            (kriva == 6 .AND. .not.scrivi                  ) ) then
+          &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) &
+          .or. (kriva == 6 .AND. .not.scrivi                  ) ) then
 !#if defined tempsalt
 !           !call interp(ib,jb,kb,x1,y1,z1,temp,salt,dens,1)
 !           call interp2(ib,jb,kb,temp,salt,dens)
@@ -224,8 +234,14 @@ CONTAINS
           write(56,566) ntrac,ints,x1,y1,z1,tt/3600.,t0/3600.
 #else
 #if defined tempsalt
+# ifdef larval_fish
+          flen1 = fish(ntrac,i_length)
+          write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                        dens,lat,lon,zed, flen1
+# else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
                         dens,lat,lon,zed
+#endif
 #else
           write(56,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol,lat,lon,zed
 #endif
@@ -251,8 +267,16 @@ CONTAINS
                tt/tday,t0/tday,subvol,temp,salt,dens,lat,lon,zed
        end if
     case (17)
-       write(57,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens,lat,lon,zed
+       call interp2(ib,jb,kb,temp,salt,dens)
+#ifdef larval_fish
+       flen1 = fish(ntrac,i_length)
+       write(57,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed,flen1!,light
+#else
+       write(57,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed
+
+#endif
     case (19)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc')
@@ -263,9 +287,15 @@ CONTAINS
        enddo
        close(34)
     case (40)
-       write(59,566) ntrac,ints,x1,y1,z1,tt/tday,t0/tday,subvol &
-            ,temp,salt,dens
-    case (99) !switch
+#ifdef larval_fish
+       flen1 = fish(ntrac,i_length)
+       write(59,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed,flen1!,light
+#else
+       write(59,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt, &
+                     dens,lat,lon,zed
+#endif
+       case (99) !switch
 
     end select
 #endif
