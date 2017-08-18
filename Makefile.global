@@ -77,13 +77,13 @@ VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
-	            seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
+objects := $(addprefix $(OBJDIR)/,modules.o light.o savepsi.o loop_pos.o \
+	            writetrajs.o seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
                     interp.o interp2.o interp_ll.o pos.o \
                     sw_seck.o sw_pres.o sw_dens0.o turb.o \
                     writepsi.o writetracer.o printinfo.o loop.o main.o \
-		    setupgrid.o readfield.o diffusion.o fishvel2.o active_vert.o)
+		    setupgrid.o readfield.o diffusion.o fishvel2.o fishgrowth.o)
 
 runfile : $(objects)
 	$(FF) $(MYI_FLAGS) -o $(RUNFILE) $(objects) $(LNK_FLAGS) $(MYL_FLAGS)

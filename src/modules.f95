@@ -442,9 +442,8 @@ MODULE mod_vel
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:)    :: uflux, vflux
 #ifdef larval_fish
   !INTEGER                                  :: nst=2
-  !REAL                                     :: zed
-  REAL                                      :: depth1, flen1
-  REAL                                      :: light, srflx
+  REAL                                      :: flen1
+  REAL                                      :: srflx
   REAL                                      :: hsblx
   REAL                                      :: depth2(2),srflx2(2),hsblx2(2)
 #endif
@@ -598,6 +597,7 @@ ENDMODULE mod_diffusion
 MODULE mod_fish
 #ifdef larval_fish
   REAL*8 :: wfish
+  REAL*8 :: z_nit, z_day, light
   REAL*8, ALLOCATABLE, DIMENSION(:,:)          :: fish
   INTEGER, ALLOCATABLE, DIMENSION(:)           :: stage
   INTEGER, parameter :: nfish_var = 4

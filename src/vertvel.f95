@@ -97,5 +97,3 @@ enddo
   return
 
 end subroutine vertvel
-
-

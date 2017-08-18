@@ -1,32 +1,35 @@
-!#ifndef timeanalyt 
+!#ifndef timeanalyt
 
 subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
-  
-  ! subroutine to compute time (sp,sn) when trajectory 
-  ! crosses face of box (ia,ja,ka) 
-  ! two crossings are considered for each direction:  
-  ! east and west for longitudinal directions, etc.  
-  ! 
+
+  ! subroutine to compute time (sp,sn) when trajectory
+  ! crosses face of box (ia,ja,ka)
+  ! two crossings are considered for each direction:
+  ! east and west for longitudinal directions, etc.
+  !
   !  Input:
   !
   !  ijk      : considered direction (i=zonal, 2=meridional, 3=vertical)
   !  ia,ja,ka : original position in integers
-  !  r0       : original non-dimensional position in the 
-  !             ijk-direction of particle 
-  !             (fractions of a grid box side in the 
+  !  r0       : original non-dimensional position in the
+  !             ijk-direction of particle
+  !             (fractions of a grid box side in the
   !              corresponding direction)
-  !  intrpr       : time interpolation constant between 0 and 1 
+  !  intrpr       : time interpolation constant between 0 and 1
   !
   !
   !  Output:
   !
-  !    sp,sn   : crossing time to reach the grid box wall 
+  !    sp,sn   : crossing time to reach the grid box wall
   !              (in units of s/m3)
-  
-USE mod_grid, only: undef, imt, jmt, nsm, nsp
+
+USE mod_grid, only: undef, imt, jmt, nsm, nsp, dxdy
 USE mod_vel, only: uflux, vflux, wflux, ff
 USE mod_active_particles, only: upr
 USE mod_time, only: dtreg, intrpr, intrpg
+#ifdef fishvel
+USE mod_fish
+#endif
 IMPLICIT none
 
 real*8                                       :: r0, ba, sp, sn, uu, um, vv, vm
@@ -38,9 +41,9 @@ if(ijk.eq.1) then
  if(im.eq.0) im=IMT
  uu=(intrpg*uflux(ia,ja,ka,nsp)+intrpr*uflux(ia,ja,ka,nsm))*ff
  um=(intrpg*uflux(im,ja,ka,nsp)+intrpr*uflux(im,ja,ka,nsm))*ff
-#ifdef turb   
+#ifdef turb
  if(r0.ne.dble(ii)) then
-  uu=uu+upr(1,2)  
+  uu=uu+upr(1,2)
  else
   uu=uu+upr(1,1)  ! add u' from previous iterative time step if on box wall
  endif
@@ -54,9 +57,9 @@ elseif(ijk.eq.2) then
  ii=ja
  uu=(intrpg*vflux(ia,ja  ,ka,nsp)+intrpr*vflux(ia,ja  ,ka,nsm))*ff
  um=(intrpg*vflux(ia,ja-1,ka,nsp)+intrpr*vflux(ia,ja-1,ka,nsm))*ff
-#ifdef turb    
+#ifdef turb
  if(r0.ne.dble(ja  )) then
-  uu=uu+upr(3,2)  
+  uu=uu+upr(3,2)
  else
   uu=uu+upr(3,1)  ! add u' from previous iterative time step if on box wall
  endif
@@ -75,16 +78,20 @@ elseif(ijk.eq.3) then
  uu=intrpg*wflux(ka  ,nsp)+intrpr*wflux(ka  ,nsm)
  um=intrpg*wflux(ka-1,nsp)+intrpr*wflux(ka-1,nsm)
 #endif
+#ifdef fishvel
+ uu = uu + wfish * dxdy(ia,ja)
+ um = um + wfish * dxdy(ia,ja)
+#endif
 
-#ifndef twodim   
-#ifdef turb   
+#ifndef twodim
+#ifdef turb
  if(r0.ne.dble(ka  )) then
-  uu=uu+upr(5,2)  
+  uu=uu+upr(5,2)
  else
   uu=uu+upr(5,1)  ! add u' from previous iterative time step if on box wall
  endif
  if(r0.ne.dble(ka-1)) then
-  uu=uu+upr(6,2)  
+  uu=uu+upr(6,2)
  else
   uu=uu+upr(6,1)  ! add u' from previous iterative time step if on box wall
  endif
@@ -114,7 +121,7 @@ if(sp.le.0.d0) sp=UNDEF
 ! west, south or downward crossing
 if(um.lt.0.d0 .and. r0.ne.dble(ii-1)) then
  if(um.ne.uu)then
-  ba=-((r0-dble(ii))*(uu-um)+uu) 
+  ba=-((r0-dble(ii))*(uu-um)+uu)
   if(ba.gt.0.d0) then
 !   sn=-1.d0/(um-uu)*( dlog(-um) - dlog(ba)  )
    sn=( dlog(ba) - dlog(-um)  )/(um-uu)
