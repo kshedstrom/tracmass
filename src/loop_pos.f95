@@ -9,6 +9,9 @@ module mod_pos
   USE mod_psi
   USE mod_tempsalt
   USE mod_traj, only: ntrac
+#ifdef fishvel
+  USE mod_fish
+#endif
 
   IMPLICIT none
 
@@ -234,6 +237,9 @@ contains
        uu=wflux(ia,ja,ka,nsm)
 #else
        uu=intrpbg*wflux(ka,nsp)+intrpb*wflux(ka,nsm)
+#endif
+#ifdef fishvel
+       uu = uu + wfish * dxdy(ia,ja)
 #endif
        if(uu.gt.0.d0) then
           kb=ka+1

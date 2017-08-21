@@ -23,7 +23,7 @@ subroutine cross_stat(ijk,ia,ja,ka,r0,sp,sn)
   !    sp,sn   : crossing time to reach the grid box wall
   !              (in units of s/m3)
 
-USE mod_grid, only: undef, imt, jmt, nsm, nsp, dxdy
+USE mod_grid, only: undef, imt, jmt, km, nsm, nsp, dxdy
 USE mod_vel, only: uflux, vflux, wflux, ff
 USE mod_active_particles, only: upr
 USE mod_time, only: dtreg, intrpr, intrpg

@@ -1,6 +1,6 @@
-#ifdef timeanalyt 
+#ifdef timeanalyt
   !
-  ! The subroutines related to the time-analytical option of TRCAMSS are located in this file below 
+  ! The subroutines related to the time-analytical option of TRCAMSS are located in this file below
   ! The schemes are by Vries and Doos (2001) and Doos et al. (2013)
   !
   !         um-------------------------------------------uu
@@ -28,37 +28,37 @@
   !
 subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn)
 
-  ! subroutine to compute time (sp,sn) when trajectory 
-  ! crosses face of box (ia,ja,ka) 
-  ! two crossings are considered for each direction:  
-  ! east and west for longitudinal directions, etc.  
+  ! subroutine to compute time (sp,sn) when trajectory
+  ! crosses face of box (ia,ja,ka)
+  ! two crossings are considered for each direction:
+  ! east and west for longitudinal directions, etc.
   !
   !  Input:
   !
   !  ijk      : Considered direction (i=zonal, 2=meridional, 3=vertical)
   !  ia,ja,ka : Original position in integers
-  !  r0       : Original non-dimensional position in the 
-  !             ijk-direction of particle 
-  !               (fractions of a grid box side in the 
+  !  r0       : Original non-dimensional position in the
+  !             ijk-direction of particle
+  !               (fractions of a grid box side in the
   !                corresponding direction)
   !  ts       : Model dataset time step of trajectory
-  !  tt       : Time in seconds of the trajectory relative to the code start 
+  !  tt       : Time in seconds of the trajectory relative to the code start
   !  dsmin    : Timestep in sec divided by Volume of the grid-cell
   !  dxyz     : Volume of current grid-cell
-  !  intrpr   : Time interpolation constant between 0 and 1 
+  !  intrpr   : Time interpolation constant between 0 and 1
   !
   !
   !  Output:
   !
-  !    sp,sn   : crossing time to reach the grid box wall 
+  !    sp,sn   : crossing time to reach the grid box wall
   !              (in units of s/m3)
   !
   ! computation of time (ss) at crossing for a>0, a<0 and a=0
   ! using knowledge of possible sign changes of velocities inside gridbox,
   ! the direction (rijk) (east/west or north/south or up/down) is determined
-  ! except for boxes containing land points, solutions are traced until 
-  ! the end of a season, so sometimes trajectories do not end on an edge! 
-  ! depending on velocities there may be no solution in both directions 
+  ! except for boxes containing land points, solutions are traced until
+  ! the end of a season, so sometimes trajectories do not end on an edge!
+  ! depending on velocities there may be no solution in both directions
   ! ss0(+dsmin): start(end) of season; s=s0: xi=xi0; s=ss: xi=xin
   ! numerical computation of root:
   ! let f(xi) = 0 be the root to be computed giving the time ss
@@ -66,11 +66,11 @@ subroutine cross_time(ijk,ia,ja,ka,r0,sp,sn)
   ! 0 = f(xi) = (Taylor expansion) f(x) + (xi-x)*f'(x)
   ! with f' being the derivative of f (---> velocity)
   ! this gives the iteration method: xi_(n+1) = xi_n - f(xi_n)/f'(xi_n)
-  ! choose initial value xi00 and use direction rijk for boundary condition 
+  ! choose initial value xi00 and use direction rijk for boundary condition
   ! iteration variable xi_n is optimized during calculations for situations
   ! that would degrade convergency
   ! first, the accuracy parameter xxlim is used for minimizing f(x); then,
-  ! xxlim is used to minimize the numerical error in the time variable ss 
+  ! xxlim is used to minimize the numerical error in the time variable ss
   !
   !
 
@@ -79,9 +79,12 @@ USE mod_precdef
 USE mod_param
 USE mod_vel
 USE mod_traj, only: ntrac
-USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm
+USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm, dxdy
 USE mod_time, only: ts, tt, tseas, intrpr, intrpg
 USE mod_loopvars!, only: dsmin
+#ifdef fishvel
+USE mod_fish
+#endif
 
 IMPLICIT NONE
 
@@ -93,9 +96,9 @@ REAL (DP)   :: r0,sp,sn
 !_______________________________________________________________________________
 sp=UNDEF ; sn=UNDEF
 
-#ifdef twodim  
+#ifdef twodim
 if(ijk==3) return
-#endif 
+#endif
 
 if(dxyz<EPS) stop 8701
 if(dsmin==1.0_dp) stop 8702
@@ -114,20 +117,20 @@ if(ijk==1) then
  um=uflux(iil,ja,ka,nsm)
  vv=uflux(ii ,ja,ka,nsp)
  vm=uflux(iil,ja,ka,nsp)
-#ifdef turb   
+#ifdef turb
  if(r0/=dble(ja)) then
-  uu=uu+upr(7,2)  
-  vv=vv+upr(1,2)  
+  uu=uu+upr(7,2)
+  vv=vv+upr(1,2)
  else  ! add u' from previous iterative time step if on box wall
-  uu=uu+upr(7,1) 
-  vv=vv+upr(1,1)  
+  uu=uu+upr(7,1)
+  vv=vv+upr(1,1)
  endif
  if(r0=/dble(ja-1)) then
   um=um+upr(8,2)
   vm=vm+upr(2,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr(8,1)  
-  vm=vm+upr(2,1)  
+  um=um+upr(8,1)
+  vm=vm+upr(2,1)
  endif
 #endif
 elseif(ijk==2) then
@@ -138,20 +141,20 @@ elseif(ijk==2) then
  um=vflux(ia,iil,ka,nsm)
  vv=vflux(ia,ii ,ka,nsp)
  vm=vflux(ia,iil,ka,nsp)
-#ifdef turb   
+#ifdef turb
  if(r0/=dble(ii)) then
-  vv=vv+upr(3,2)  
-  uu=uu+upr(9,2)  
+  vv=vv+upr(3,2)
+  uu=uu+upr(9,2)
  else  ! add u' from previous iterative time step if on box wall
-  vv=vv+upr(3,1)  
-  uu=uu+upr(9,1) 
+  vv=vv+upr(3,1)
+  uu=uu+upr(9,1)
  endif
  if(r0/=dble(iim)) then
   um=um+upr( 4,2)
   vm=vm+upr(10,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr( 4,1)  
-  vm=vm+upr(10,1)  
+  um=um+upr( 4,1)
+  vm=vm+upr(10,1)
  endif
 #endif
 elseif(ijk==3) then
@@ -162,29 +165,33 @@ elseif(ijk==3) then
  um=wflux(iil,nsm)
  vv=wflux(ii ,nsp)
  vm=wflux(iil,nsp)
-#ifdef turb   
+#ifdef fishvel
+ uu = uu + wfish * dxdy(ia,ja)
+ um = um + wfish * dxdy(ia,ja)
+#endif
+#ifdef turb
  if(r0/=dble(ii)) then
-  vv=vv+upr( 5,2)  
-  uu=uu+upr(11,2)  
+  vv=vv+upr( 5,2)
+  uu=uu+upr(11,2)
  else  ! add u' from previous iterative time step if on box wall
-  vv=vv+upr( 5,1)  
-  uu=uu+upr(11,1) 
+  vv=vv+upr( 5,1)
+  uu=uu+upr(11,1)
  endif
  if(r0/=dble(iim)) then
   um=um+upr( 6,2)
   vm=vm+upr(12,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr( 6,1)  
-  vm=vm+upr(12,1)  
+  um=um+upr( 6,1)
+  vm=vm+upr(12,1)
  endif
 #endif
 
-#ifdef zgrid3D 
+#ifdef zgrid3D
 
   dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
   dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
-!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
-  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong??
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present"
   if(abs(dzu1)<eps) stop 8705
   if(abs(dzu2)<eps) stop 8706
   f0=dzs/dzu1
@@ -215,7 +222,7 @@ elseif(ijk==3) then
   if(abs(f1)<eps) stop 8708
   f0=1.0_dp/f0
   f1=1.0_dp/f1
- endif 
+ endif
 #endif /*zgrid3D*/
 
 
@@ -228,12 +235,12 @@ alfa = -(vv-vm-uu+um)
 !     if (alfa>EPS) then
      if (alfa>0.0_dp) then
       call apos (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
-! ----- a < 0      
+! ----- a < 0
 !     elseif (alfa<-EPS) then
      elseif (alfa<0.0_dp) then
       call amin (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
  !     print *,'amin',ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin
-! ----- a = 0 
+! ----- a = 0
       else
       if (alfa/=0.0_dp) print *,'anil eps=',alfa
       call anil (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
@@ -252,7 +259,7 @@ alfa = -(vv-vm-uu+um)
       endif
       if(sp==0.0_dp) sp=UNDEF
       if(sn==0.0_dp) sn=UNDEF
-      
+
 !    if(sp/=undef .or. sn/=undef) print *,'cross_time',ss,s0,sp,sn
 !      if(ijk==3) stop 49678
 !stop 4856
@@ -261,29 +268,29 @@ end subroutine cross_time
 !_______________________________________________________________________
 
 subroutine pos_time(ijk,ia,ja,ka,r0,r1)
-  ! subroutine to compute  the new position (r0) of the trajectory 
+  ! subroutine to compute  the new position (r0) of the trajectory
   !
   !  Input:
   !
   !  ijk      : Considered direction (i=zonal, 2=meridional, 3=vertical)
   !  ia,ja,ka : Original position in integers
-  !  r0       : Original non-dimensional position in the 
-  !             ijk-direction of particle 
-  !               (fractions of a grid box side in the 
+  !  r0       : Original non-dimensional position in the
+  !             ijk-direction of particle
+  !               (fractions of a grid box side in the
   !                corresponding direction)
   !  ts       : Model dataset time step of trajectory
-  !  tt       : Time in seconds of the trajectory relative to the code start 
+  !  tt       : Time in seconds of the trajectory relative to the code start
   !  dsmin    : Timestep in sec divided by Volume of the grid-cell
   !  dxyz     : Volume of current grid-cell
   !  ds       : Min time to face crossing calc in cross
-  !  rr       : Time interpolation constant between 0 and 1 
+  !  rr       : Time interpolation constant between 0 and 1
   !
   !
   !  Output:
   !
-  !  r1       : New non-dimensional position in the 
-  !             ijk-direction of particle 
-  !               (fractions of a grid box side in the 
+  !  r1       : New non-dimensional position in the
+  !             ijk-direction of particle
+  !               (fractions of a grid box side in the
   !                corresponding direction)
 
   !
@@ -292,11 +299,15 @@ USE mod_precdef
 USE mod_param
 USE mod_vel
 USE mod_traj, only: ntrac
-USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm
+USE mod_grid, only: dxyz,dzt,imt,km, nsp, nsm, dxdy
 !USE mod_grid
 USE mod_time!, only: tt,ts,tseas,intrpr, intrpg
 USE mod_loopvars!, only: ds, dsmin
 USE mod_precdef
+#ifdef fishvel
+USE mod_fish
+#endif
+
 IMPLICIT NONE
 
 REAL (DP),  PARAMETER ::  xilim=3.0,xxlim=1.d-7
@@ -307,12 +318,12 @@ REAL (DP)  :: f0,f1,dzs,dzu1,dzu2,s0,ss
 REAL (DP)  :: r0,r1!,ss0
 
 
-#ifdef twodim  
+#ifdef twodim
 if(ijk==3) then
 r1=r0
 return
 endif
-#endif 
+#endif
 
 s0=tt/dxyz-ds
 !ss0=dble(idint(ts))*tseas/dxyz
@@ -328,20 +339,20 @@ if(ijk==1) then
  um=uflux(iil,ja,ka,nsm)
  vv=uflux(ii ,ja,ka,nsp)
  vm=uflux(iil,ja,ka,nsp)
-#ifdef turb   
+#ifdef turb
  if(r0/=dble(ja)) then
-  uu=uu+upr(7,2)  
-  vv=vv+upr(1,2)  
+  uu=uu+upr(7,2)
+  vv=vv+upr(1,2)
  else  ! add u' from previous iterative time step if on box wall
-  uu=uu+upr(7,1) 
-  vv=vv+upr(1,1)  
+  uu=uu+upr(7,1)
+  vv=vv+upr(1,1)
  endif
  if(r0/=dble(ja-1)) then
   um=um+upr(8,2)
   vm=vm+upr(2,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr(8,1)  
-  vm=vm+upr(2,1)  
+  um=um+upr(8,1)
+  vm=vm+upr(2,1)
  endif
 #endif
 elseif(ijk==2) then
@@ -352,20 +363,20 @@ elseif(ijk==2) then
  um=vflux(ia,iil,ka,nsm)
  vv=vflux(ia,ii ,ka,nsp)
  vm=vflux(ia,iil,ka,nsp)
-#ifdef turb   
+#ifdef turb
  if(r0/=dble(ii)) then
-  vv=vv+upr(3,2)  
-  uu=uu+upr(9,2)  
+  vv=vv+upr(3,2)
+  uu=uu+upr(9,2)
  else  ! add u' from previous iterative time step if on box wall
-  vv=vv+upr(3,1)  
-  uu=uu+upr(9,1) 
+  vv=vv+upr(3,1)
+  uu=uu+upr(9,1)
  endif
  if(r0/=dble(iim)) then
   um=um+upr( 4,2)
   vm=vm+upr(10,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr( 4,1)  
-  vm=vm+upr(10,1)  
+  um=um+upr( 4,1)
+  vm=vm+upr(10,1)
  endif
 #endif
 elseif(ijk==3) then
@@ -376,29 +387,33 @@ elseif(ijk==3) then
  um=wflux(iil,nsm)
  vv=wflux(ii ,nsp)
  vm=wflux(iil,nsp)
-#ifdef turb   
+#ifdef fishvel
+ uu = uu + wfish * dxdy(ia,ja)
+ um = um + wfish * dxdy(ia,ja)
+#endif
+#ifdef turb
  if(r0/=dble(ii)) then
-  vv=vv+upr( 5,2)  
-  uu=uu+upr(11,2)  
+  vv=vv+upr( 5,2)
+  uu=uu+upr(11,2)
  else  ! add u' from previous iterative time step if on box wall
-  vv=vv+upr( 5,1)  
-  uu=uu+upr(11,1) 
+  vv=vv+upr( 5,1)
+  uu=uu+upr(11,1)
  endif
  if(r0/=dble(iim)) then
   um=um+upr( 6,2)
   vm=vm+upr(12,2)
  else  ! add u' from previous iterative time step if on box wall
-  um=um+upr( 6,1)  
-  vm=vm+upr(12,1)  
+  um=um+upr( 6,1)
+  vm=vm+upr(12,1)
  endif
 #endif
 
-#ifdef zgrid3D 
+#ifdef zgrid3D
 
   dzu1=dzt(ia,ja,ka,nsm) ! layer thickness at time step n-1
   dzu2=dzt(ia,ja,ka,nsp) ! layer thickness at time step n
-!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong?? 
-  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present" 
+!  dzs= intrpg*dzu1 + intrpr*dzu2   ! layer thickness at time interpolated for "present" ! (wrong??
+  dzs= intrpr*dzu1 + intrpg*dzu2   ! layer thickness at time interpolated for "present"
   if(abs(dzu1)<eps) stop 4966
   if(abs(dzu2)<eps) stop 4967
   f0=dzs/dzu1
@@ -428,7 +443,7 @@ elseif(ijk==3) then
   if(abs(f1)<eps) stop 4969
   f0=1.0_dp/f0
   f1=1.0_dp/f1
- endif 
+ endif
 #endif /*zgrid3D*/
 
 
@@ -440,7 +455,7 @@ endif
 ! print *,'pos'
 ! print *,ijk,ia,ja,ka,r0,r1,ds,intrpr
 ! print *,uu,vv,um,vm
-! call pos_orgn(ijk,ia,ja,ka,r0,r1,ds,intrpr) 
+! call pos_orgn(ijk,ia,ja,ka,r0,r1,ds,intrpr)
 !
 ! return
 !endif
@@ -464,7 +479,7 @@ if (alfa>0.0_dp) then
  const=2.d0*const/dsqrt(2.d0*alfa)
  xi0=(beta+alfa*(s0-ss0))/dsqrt(2.d0*alfa)
  xi =(beta+alfa*(ss-ss0))/dsqrt(2.d0*alfa)
- daw0 = dawson2(xi0) 
+ daw0 = dawson2(xi0)
  r1 = dawson1 (const,daw0,r0+ga,xi0,xi) -ga
 !print *,'alfa>0',f0,r1,const,daw0,r0+ga,xi0,xi,ga,dawson1 (const,daw0,r0+ga,xi0,xi)
 elseif (alfa<0.0_dp) then
@@ -478,12 +493,12 @@ elseif (alfa<0.0_dp) then
  else ! error function
   erf0 = - s15aef(xi0)     !       erf0 = - s15aef(xi0, ifail)
  endif
- r1 = errfun (const,erf0,r0+ga,xi0,xi) -ga 
+ r1 = errfun (const,erf0,r0+ga,xi0,xi) -ga
 elseif (alfa==0.0_dp) then
  if (f0==0.0_dp) then
   f0=1.0_dp
   f1=1.0_dp
- endif 
+ endif
  alfa = um-uu
  beta =(f0*um-f1*vm)/dsmin
  xi = ss-s0
@@ -494,7 +509,7 @@ elseif (alfa==0.0_dp) then
  else
   ga = (r0-dble(iim)) + (beta*(s0-ss0-1.0_dp/alfa)-f0*um)/alfa
   r1 = r0 + ga*(dexp(-alfa*xi) - 1.0_dp) -beta*xi/alfa
- endif 
+ endif
 endif
 
 !print *,'alfa,beta',alfa,beta,r0-r1
@@ -523,7 +538,7 @@ end subroutine pos_time
 !_______________________________________________________________________
 
 subroutine apos (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
-! computation of time (ss) at crossing for a>0 
+! computation of time (ss) at crossing for a>0
 
 USE mod_precdef
 USE mod_param
@@ -536,7 +551,7 @@ REAL (DP),  PARAMETER ::  xxlim=1.d-7
 INTEGER :: ii,iim,iconfig,i,loop
 REAL (DP)  :: uu,um,vv,vm,xi0,xin,ssii,ssiim,xerr,xf1,xi,xi00,xia,xib,xibf
 REAL (DP)  :: alfa,beta,ga,const,daw0,xf,xf2,xiaf,dawson1,dawson2
-REAL (DP)  :: rijk,ss,f0,f1,s0,ss0 
+REAL (DP)  :: rijk,ss,f0,f1,s0,ss0
 REAL (DP)  :: r0,dsmin
 
 !print *,'ii',ii
@@ -546,16 +561,16 @@ if(alfa<EPS) stop 8771
 beta = um-uu                                ! not same as beta in paper
 xi0=(beta+alfa*(s0-ss0))/dsqrt(2._dp*alfa)  ! same as xi0 in paper where s=s0-ss0
 
-! 1) ii or iim ---> land point 
+! 1) ii or iim ---> land point
 if (uu==0.0_dp .and. vv==0.0_dp) then
- xin =-dlog(dble(ii)-r0) 
+ xin =-dlog(dble(ii)-r0)
  if (xi0<0.0_dp .and. xi0*xi0>=xin) then
   rijk = dble(iim)
   xin=-dsqrt(xi0*xi0-xin)
   ss= 2._dp*(xin-xi0)/dsqrt(2._dp*alfa) + s0
   return
  else ! no solution
-  return 
+  return
  endif
 elseif (um==0.0_dp .and. vm==0.0_dp ) then
 ! xin =-log(r0-iim)
@@ -601,9 +616,9 @@ endif
 
 
 const = 2.*const/dsqrt(2.*alfa)
-daw0 = dawson2(xi0)    
+daw0 = dawson2(xi0)
 ! 'velocity' at xi0
-xf1 = const -(xi0+xi0)*(r0+ga)  
+xf1 = const -(xi0+xi0)*(r0+ga)
 
 ! 2) ii direction (four velocity configurations at edge)
 if (ssii<=0.0_dp .or. ssii>=1.0_dp) then
@@ -616,18 +631,18 @@ if (ssii<=0.0_dp .or. ssii>=1.0_dp) then
  ! print *,'2b configuration: --- no solution, try rijk=iim=',iim,ssii,uu,vv
   rijk=dble(iim)
   goto 3000
- endif 
+ endif
 else
  if (vv>0.0_dp) then
 ! 2c) configuration: -- 0 ++
-  iconfig = 3   
+  iconfig = 3
   xi00=(vm-vv)/dsqrt(2.0_dp*alfa)
  else
 ! 2d) configuration: ++ 0 --
   if (s0-ss0>=ssii*dsmin) goto 3000
   iconfig = 4
-  xi00=(beta+alfa*ssii*dsmin)/dsqrt(2.0_dp*alfa) 
- endif 
+  xi00=(beta+alfa*ssii*dsmin)/dsqrt(2.0_dp*alfa)
+ endif
 endif
 
 xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(ii)
@@ -647,12 +662,12 @@ xibf=xf
    xf2=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa)
    xf2=dawson1(const,daw0,r0+ga,xi0,xf2)-ga-dble(iim)
    if (xf2<0.0_dp) goto 3000
-  endif                
+  endif
   if (iconfig==4) then
    xi00=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa)
    xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(ii)
   endif
- endif     
+ endif
  goto 1000
 
 3000  continue
@@ -668,18 +683,18 @@ xibf=xf
 ! 3b) configuration: ---
        iconfig = 6
        xi00=(vm-vv)/dsqrt(2.0_dp*alfa)
-      endif 
+      endif
      else
       if (vm>0.0_dp) then
 ! 3c) configuration: -- 0 ++
        if (s0-ss0>=ssiim*dsmin) return
-       iconfig = 7   
-       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa) 
+       iconfig = 7
+       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(2.0_dp*alfa)
       else
 ! 3d) configuration: ++ 0 --
        iconfig = 8
-       xi00=(vm-vv)/dsqrt(2.0_dp*alfa) 
-      endif 
+       xi00=(vm-vv)/dsqrt(2.0_dp*alfa)
+      endif
      endif
      xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(iim)
      if (xf>0.0_dp) return
@@ -694,7 +709,7 @@ xibf=xf
      elseif (iconfig==7) then
       xi00=(beta+alfa*ssii*dsmin)/dsqrt(2.0_dp*alfa)
       xf=dawson1(const,daw0,r0+ga,xi0,xi00)-ga-dble(iim)
-     endif      
+     endif
 
 1000  continue
 ! calculation of root
@@ -704,7 +719,7 @@ xibf=xf
        xi=xi+0.05
        xf2= dawson1 (const,daw0,r0+ga,xi0,xi)
        xf = xf2-ga-rijk
-       xf1= const-(xi+xi)*xf2 
+       xf1= const-(xi+xi)*xf2
 !       print *, ' loop', xi, xf, xf1
       enddo
       loop = 1000
@@ -713,7 +728,7 @@ xibf=xf
      xi = xi00
      xf1= const-(xi+xi)*(xf+rijk+ga)
      xia = xi0
-     xiaf= r0-rijk 
+     xiaf= r0-rijk
      xerr = xxlim
      ssii = xxlim
 100   continue
@@ -739,12 +754,12 @@ xibf=xf
  !     ic=3   What is this????????? Should it be iconfig=3 ?????????????????????
        iconfig=3 ! ?????????????
 ! print *,'What is this?????',xi,xin
-      xi = xin 
+      xi = xin
      endif
 
      xf2= dawson1 (const,daw0,r0+ga,xi0,xi)
      xf = xf2-ga-rijk
-     xf1= const-(xi+xi)*xf2 
+     xf1= const-(xi+xi)*xf2
 !     if(loop==1000) print *, ' loop', xi, xf, xf1
      if (dabs(xf)>=xerr) then
       goto 100
@@ -785,7 +800,7 @@ end subroutine apos
 
 subroutine amin (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 
-! computation of time (ss) at crossing for a<0 
+! computation of time (ss) at crossing for a<0
 
 USE mod_precdef
 USE mod_param
@@ -796,7 +811,7 @@ REAL (DP),  PARAMETER ::  xilim=3.0_dp,xxlim=1.d-7
 INTEGER    :: ii,iim,iconfig,i,loop
 REAL (DP)  :: uu,um,vv,vm,xib,xia,xi00,xi0,xf1,xf,xf2,xin,xibf,xi,xerr,xiaf
 REAL (DP)  :: alfa,beta,ga,s15aef,s15adf,erf0,const,errfun
-REAL (DP)  :: rijk,ss,f0,f1,s0,ss0,ssii,ssiim   
+REAL (DP)  :: rijk,ss,f0,f1,s0,ss0,ssii,ssiim
 REAL (DP)  :: r0,dsmin
 
 if(dabs(dsmin)<eps) stop 8801
@@ -810,10 +825,10 @@ endif
 !print *,'alfabera=',alfa,beta,vv,uu,vm,um,dsmin,xi0,f0
 
 
-! 1) ii or iim ---> land point 
+! 1) ii or iim ---> land point
      if (uu==0.0_dp .and. vv==0.0_dp) then
       rijk = dble(iim)
-      xin =-dlog(dble(ii)-r0) 
+      xin =-dlog(dble(ii)-r0)
       xin =-dsqrt(xi0*xi0+xin)
       ss= 2.0_dp*(xi0-xin)/dsqrt(-2.0_dp*alfa) + s0
       return
@@ -823,7 +838,7 @@ endif
       xin =-dsqrt(xi0*xi0+xin)
       ss= 2.0_dp*(xi0-xin)/dsqrt(-2.0_dp*alfa) + s0
       return
-     endif 
+     endif
 
      if (f0==0.0_dp) then
       if(dabs(vv-uu-vm+um)<EPS) stop 8803
@@ -862,7 +877,7 @@ endif
       erf0 = -s15aef(xi0)
      endif
 ! minus-velocity at xi0
-     xf1 = xi0*(r0+ga)-(const/dsqrt(pi)) 
+     xf1 = xi0*(r0+ga)-(const/dsqrt(pi))
 
 ! 2) ii direction (four velocity configurations at edge)
      if (ssii<=0.0_dp .or. ssii>=1.0_dp) then
@@ -874,18 +889,18 @@ endif
 ! 2b) configuration: --- no solution, try rijk=iim
        rijk=dble(iim)
        goto 4000
-      endif 
+      endif
      else
       if (vv>0.0_dp) then
 ! 2c) configuration: -- 0 ++
-       iconfig = 3   
+       iconfig = 3
        xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
       else
 ! 2d) configuration: ++ 0 --
        if (s0-ss0>=ssii*dsmin) goto 4000
        iconfig = 4
-       xi00=(beta+alfa*ssii*dsmin)/dsqrt(-2.0_dp*alfa) 
-      endif 
+       xi00=(beta+alfa*ssii*dsmin)/dsqrt(-2.0_dp*alfa)
+      endif
      endif
      xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(ii)
      if (xf<0.0_dp) goto 4000
@@ -908,7 +923,7 @@ endif
        xi00=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa)
        xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(ii)
       endif
-     endif 
+     endif
      goto 2000
 
 4000  continue
@@ -924,18 +939,18 @@ endif
        iconfig = 6
        xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
 !       print *,'xi00',xi00
-      endif 
+      endif
      else
       if (vm>0.0_dp) then
 ! 3c) configuration: -- 0 ++
        if (s0-ss0>=ssiim*dsmin) return
-       iconfig = 7   
-       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa) 
+       iconfig = 7
+       xi00=(beta+alfa*ssiim*dsmin)/dsqrt(-2.0_dp*alfa)
       else
 ! 3d) configuration: ++ 0 --
        iconfig = 8
-       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa) 
-      endif 
+       xi00=(vm-vv)/dsqrt(-2.0_dp*alfa)
+      endif
      endif
      xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(iim)
      if (xf>0.0_dp) return
@@ -947,7 +962,7 @@ endif
        xi00=xi0
        xf=r0-rijk
       endif
-     elseif (iconfig==7) then   
+     elseif (iconfig==7) then
       xi00=(beta+alfa*ssii*dsmin)/dsqrt(-2.0_dp*alfa)
       xf=errfun(const,erf0,r0+ga,xi0,xi00)-ga-dble(iim)
      endif
@@ -960,7 +975,7 @@ endif
        xi=xi-0.005_dp
        xf2= errfun (const,erf0,r0+ga,xi0,xi)
        xf = xf2-ga-rijk
-       xf1= xi*xf2-(const/dsqrt(pi)) 
+       xf1= xi*xf2-(const/dsqrt(pi))
        print *, ' loop', xi, xf, xf1
       enddo
       loop = 1000
@@ -971,7 +986,7 @@ endif
      xia = xi0
      xiaf= r0-rijk
      xerr = xxlim
-     ssii = xxlim      
+     ssii = xxlim
 200   continue
      loop=loop+1
      if(loop==80) then
@@ -983,7 +998,7 @@ endif
      xf1 = xf1+xf1
 !     xin = xi - xf/xf1
      if(xf1==1.0_dp) then
-      xin=xi 
+      xin=xi
      else
       xin=xi-xf/xf1
      endif
@@ -996,7 +1011,7 @@ endif
       xiaf= xf
       xi = 0.5_dp*(xi+xib)
      else
-      xi = xin      
+      xi = xin
      endif
      xf2= errfun (const,erf0,r0+ga,xi0,xi)
      xf1= xi*xf2-(const/dsqrt(pi))
@@ -1016,7 +1031,7 @@ endif
 
      endif
 300   continue
-     ss= 2.0_dp*(xi0-xi)/dsqrt(-2.0_dp*alfa) + s0 
+     ss= 2.0_dp*(xi0-xi)/dsqrt(-2.0_dp*alfa) + s0
      if (xi/=xi0) xin=dabs( xf/((xi-xi0)*xf1) )
      if (loop==1000.or.ss-s0<0.0_dp) then
       if (ss-s0<0.0_dp) then
@@ -1024,8 +1039,8 @@ endif
        stop 48967
       endif
      endif
-     
-     
+
+
 
 return
 end subroutine amin
@@ -1033,7 +1048,7 @@ end subroutine amin
 
 subroutine anil (ii,iim,r0,rijk,s0,ss,ss0,uu,um,vv,vm,f0,f1,loop,dsmin)
 
-! computation of time (ss) at crossing for alfa=0 
+! computation of time (ss) at crossing for alfa=0
 
 USE mod_precdef
 USE mod_param
@@ -1054,7 +1069,7 @@ if (f0==0.0_dp) then
 endif
 
 alfa = um-uu
-beta =(f0*um-f1*vm)/dsmin 
+beta =(f0*um-f1*vm)/dsmin
 !if(abs(beta)<EPS) then
 ! print *,'beta=',beta,f0*um,f1*vm,dsmin
 !endif
@@ -1088,7 +1103,7 @@ if (alfa==0.0_dp) then
     rijk=dble(ii)
    else
     rijk=dble(iim)
-   endif         
+   endif
    if ( (s0+ga)**2 >= 2.*(rijk-r0)/beta ) then
     ss=-ga-dsqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
    else
@@ -1099,14 +1114,14 @@ if (alfa==0.0_dp) then
     endif
     ss=-ga+dsqrt( (s0+ga)**2-2.*(rijk-r0)/beta )
    endif
-  endif         
+  endif
  endif
  return
 else
  if (beta==0.0_dp) then  ! b=0: stationary velocity fields !!!
   if (uu>0.0_dp) then
    if(abs((uu-um*(f0-1.0_dp)))<EPS) stop 8842
-   xi=1.0_dp+(r0-dble(ii))*(uu-um)/(uu-um*(f0-1.0_dp))        
+   xi=1.0_dp+(r0-dble(ii))*(uu-um)/(uu-um*(f0-1.0_dp))
    if(xi>0.0_dp) then
     if(xi<EPS) stop 8843
     rijk=dble(ii)
@@ -1115,7 +1130,7 @@ else
      ss= s0 - 1.0_dp/(uu-um)*log(xi)
     else
      if(abs(uu-um*(f0-1.0_dp))<eps) stop 8844
-     ss= s0 + (dble(ii)-r0)/(uu-um*(f0-1.0_dp)) 
+     ss= s0 + (dble(ii)-r0)/(uu-um*(f0-1.0_dp))
     endif
     if(ss<eps) stop 8845
     if (ss<=0.0_dp) ss=UNDEF
@@ -1124,7 +1139,7 @@ else
   endif
   if (um<0.0_dp) then
    !if(f0*um<eps) stop 8847
-   xi=1.0_dp+(r0-dble(iim))*(uu-um)/(f0*um)        
+   xi=1.0_dp+(r0-dble(iim))*(uu-um)/(f0*um)
    if(xi>0.0_dp) then
     rijk=dble(iim)
     if (um/=uu) then
@@ -1149,7 +1164,7 @@ else
        ga = (r0-dble(iim)) + (beta*(s0-ss0-1.0_dp/alfa)-f0*um )/alfa
        xi0 = 0.0_dp
 ! ''velocity'' at xi0
-       xf1 = f0*um-beta*(s0-ss0)-alfa*(r0-dble(iim)) 
+       xf1 = f0*um-beta*(s0-ss0)-alfa*(r0-dble(iim))
 
 ! 2) ii direction (four velocity configurations at edge)
        if (ssii<=0.0_dp .or. ssii>=dsmin) then
@@ -1161,18 +1176,18 @@ else
 ! 2b) configuration: --- no solution, try rijk=iim
          rijk=dble(iim)
          goto 3000
-        endif 
+        endif
        else
         if (vv>0.0_dp) then
 ! 2c) configuration: -- 0 ++
-         iconfig = 3   
+         iconfig = 3
          xi00=ss0+dsmin-s0
         else
 ! 2d) configuration: ++ 0 --
          if (s0-ss0>=ssii) goto 3000
          iconfig = 4
-         xi00=ss0+ssii-s0 
-        endif 
+         xi00=ss0+ssii-s0
+        endif
        endif
        xf=(r0-dble(ii))+ga*(exp(-alfa*xi00)-1.0_dp)-beta*xi00/alfa
        if (xf<0.0_dp) goto 3000
@@ -1191,8 +1206,8 @@ else
          xf2=ss0+ssiim-s0
          xf2=(r0-dble(iim))+ga*(exp(-alfa*xf2)-1.0_dp)-beta*xf2/alfa
          if (xf2<0.0_dp) goto 3000
-        endif                
-       endif   
+        endif
+       endif
        goto 1000
 
 3000    continue
@@ -1205,18 +1220,18 @@ else
 ! 3b) configuration: ---
          iconfig = 6
          xi00=ss0+dsmin-s0
-        endif 
+        endif
        else
         if (vm>0.0_dp) then
 ! 3c) configuration: -- 0 ++
          if (s0-ss0>=ssiim) return
-         iconfig = 7   
-         xi00=ss0+ssiim-s0 
+         iconfig = 7
+         xi00=ss0+ssiim-s0
         else
 ! 3d) configuration: ++ 0 --
          iconfig = 8
-         xi00=ss0+dsmin-s0 
-        endif 
+         xi00=ss0+dsmin-s0
+        endif
        endif
        xf=(r0-dble(iim))+ga*(exp(-alfa*xi00)-1.0_dp)-beta*xi00/alfa
        if (xf>0.0_dp) then
@@ -1235,7 +1250,7 @@ else
         endif
        endif
 
-! determining root and crossing time ss        
+! determining root and crossing time ss
 1000    continue
        xi00 = abs(alfa)*xi00
        xib  = abs(alfa)*xib
@@ -1243,15 +1258,15 @@ else
         xi=xi0-0.05
         do i=1,100
          xi = xi+0.05
-         xf = (r0-rijk)+ga*(exp(-sign(1.0_dp,alfa)*xi)-1.0_dp)-beta*xi/(alfa*abs(alfa)) 
-         xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi))/abs(alfa)         
+         xf = (r0-rijk)+ga*(exp(-sign(1.0_dp,alfa)*xi)-1.0_dp)-beta*xi/(alfa*abs(alfa))
+         xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi))/abs(alfa)
 !         print *, ' loop', xi, xf, xf1
         enddo
         loop=1000
        else
 
-       xi = xi00 
-       xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi))/abs(alfa) 
+       xi = xi00
+       xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi))/abs(alfa)
        xia = xi0
        xiaf= r0-rijk
        xerr = xxlim
@@ -1265,7 +1280,7 @@ else
 !         if (xerr==UNDEF) loop=1000
         goto 400
        endif
-       
+
        if(abs(xf1)<eps) stop 8859
        xin = xi - xf/xf1
      if ( abs(xf)>100.0_dp .or.(xf*xibf>0.0_dp .and. (xf1*xibf<0.0_dp .or.xin<xia)) ) then
@@ -1277,10 +1292,10 @@ else
         xiaf= xf
         xi = 0.5_dp*(xi+xib)
        else
-        xi = xin      
+        xi = xin
        endif
-       xf = (r0-rijk)+ga*(exp(-sign(1.0_dp,alfa)*xi)-1.0_dp)-beta*xi/(alfa*abs(alfa)) 
-       xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi) )/abs(alfa) 
+       xf = (r0-rijk)+ga*(exp(-sign(1.0_dp,alfa)*xi)-1.0_dp)-beta*xi/(alfa*abs(alfa))
+       xf1= (-beta/alfa-alfa*ga*exp(-sign(1.0_dp,alfa)*xi) )/abs(alfa)
        if (abs(xf)>=xerr) then
         goto 100
        elseif ( abs(xf)>xxlim*abs(xf1*(xi-xi0)).and. abs(xf)<ssii ) then
@@ -1310,7 +1325,7 @@ else
         STOP
        endif
 
-      endif 
+      endif
 
 return
 end subroutine anil
@@ -1325,7 +1340,7 @@ USE mod_precdef
  daw=dawson2(xi)
 
  dawson1=r0*dexp(xi0**2-xi**2)+const*(daw-dexp(xi0**2-xi**2)*daw0)
- 
+
  return
 
 end function dawson1
@@ -1341,14 +1356,14 @@ USE mod_precdef
  INTEGER :: i
 
 if (xi0>xilim) then ! complementary error function
- erf  = s15adf(xi)  
+ erf  = s15adf(xi)
 elseif(xi0<-xilim) then
  erf  = -s15adf(-xi)
 else
 ! if(xi/=0.0_dp) stop 3956
  erf  = -s15aef(xi) ! error function
 endif
-if (abs(xi)>25.) then 
+if (abs(xi)>25.) then
  hh0=1.0_dp
  hh=1.0_dp
  do i=1,10
@@ -1361,12 +1376,12 @@ if (abs(xi)>25.) then
  do i=1,10
   hh0=-0.5_dp*hh0*dble(i+i-1)/(xi*xi)
   hh=hh+hh0
- enddo       
- erf = 1.0_dp/dsqrt(pi)*((hh/xi)-erf) 
+ enddo
+ erf = 1.0_dp/dsqrt(pi)*((hh/xi)-erf)
 else
  erf = dexp(xi**2)*(erf-erf0)
-endif 
-errfun = r0*dexp(xi**2-xi0**2) + const*erf 
+endif
+errfun = r0*dexp(xi**2-xi0**2) + const*erf
 
 !print *,'errfun', errfun, const,erf0,r0,xi0,xi
 return
@@ -1377,7 +1392,7 @@ end function errfun
 !______________________________________________________________________________
 !function dawson2(x)
 !
-!! Returns Dawson's integral for any real x. 
+!! Returns Dawson's integral for any real x.
 !
 !USE mod_precdef
 !USE mod_param
@@ -1401,7 +1416,7 @@ end function errfun
 ! init=1
 ! do i=1,NMAX
 !  c(i)=dexp(-((2.0_dp*dble(i)-1.)*H)**2)
-! enddo 
+! enddo
 !endif
 !
 !if(abs(x)<0.2_dp) then    !  Use series expansion.
@@ -1422,8 +1437,8 @@ end function errfun
 !  dd1=dd1+2.0_dp
 !  dd2=dd2-2.0_dp
 !  e1=e2*e1
-! enddo 
-! dawson2=pisqin*dsign(dexp(-xp**2),x)*sum 
+! enddo
+! dawson2=pisqin*dsign(dexp(-xp**2),x)*sum
 !endif
 !
 !return
@@ -1623,7 +1638,7 @@ REAL (dp), PARAMETER  :: Q4(9) = (/  &
          1.97325365692316183531D+01,-1.22097010558934838708D+01,  &
         -6.99732735041547247161D+00,-2.49999970104184464568D+00,  &
          7.49999999999027092188D-01 /)
-         
+
 !----------------------------------------------------------------------
 x = xx
 IF (ABS(x) > xlarge) THEN
@@ -1769,7 +1784,7 @@ do i=1,ITMAX  ! Iterate to convergence.
  h=h*del
  if(dabs(del-1.0_dp)<EPS) goto 1
 enddo
- 
+
 print *, 'a too large, ITMAX too small in gcf',abs(del-1.0_dp),EPS,del
 print *,'cd=',an
 stop 8780
@@ -1785,7 +1800,7 @@ FUNCTION gammln(xx)
 USE mod_precdef
 IMPLICIT NONE
 !Returns the value ln[gamma(xx)] for xx > 0.
-!Internal arithmetic will be done in double precision, 
+!Internal arithmetic will be done in double precision,
 !a nicety that you can omit if five-figure accuracy is good enough.
 
 REAL (DP)  :: gammln,xx,ser,stp,tmp,x,y,cof(6)
@@ -1805,11 +1820,11 @@ ser=1.000000000190015
 do j=1,6
  y=y+1.0_dp
  ser=ser+cof(j)/y
-enddo 
+enddo
 
 if(x<1.d-10) stop 8890
 gammln=tmp+dlog(stp*ser/x)
- 
+
 return
 
 end function gammln
@@ -1820,7 +1835,7 @@ end function gammln
 SUBROUTINE gser(gamser,a,x,gln)
 
 ! USES gammln
-!Returns the incomplete gamma function P(a; x) evaluated by its series 
+!Returns the incomplete gamma function P(a; x) evaluated by its series
 ! representation as gamser. Also returns  as gln.
 
 USE mod_precdef
@@ -1850,7 +1865,7 @@ do n=1,ITMAX
  sum=sum+del
  if(dabs(del)<dabs(sum)*EPS) goto 1
 enddo
- 
+
 print *, 'a too large, ITMAX too small in gser'
 stop 8860
 
@@ -1861,43 +1876,43 @@ end subroutine gser
 
 !______________________________________________________________________________
 
-FUNCTION s15adf(x) !FUNCTION erfc(x) 
+FUNCTION s15adf(x) !FUNCTION erfc(x)
 
-! USES gammp,gammq 
-! Returns thecomplementaryerror functionerfc(x). 
+! USES gammp,gammq
+! Returns thecomplementaryerror functionerfc(x).
 
 USE mod_precdef
 IMPLICIT NONE
 REAL (DP)  :: s15adf,x,gammp,gammq
 
-if(x<0.0_dp) then 
- s15adf=1.0_dp+gammp(0.5_dp,x**2) 
-else 
- s15adf=       gammq(0.5_dp,x**2) 
-endif 
+if(x<0.0_dp) then
+ s15adf=1.0_dp+gammp(0.5_dp,x**2)
+else
+ s15adf=       gammq(0.5_dp,x**2)
+endif
 
-return 
+return
 end function s15adf
 
 !_______________________________________________________________________________
 
-FUNCTION gammq(a,x) 
+FUNCTION gammq(a,x)
 
 USE mod_precdef
 IMPLICIT NONE
-REAL (DP)  :: a,gammq,x,gammcf,gamser,gln 
+REAL (DP)  :: a,gammq,x,gammcf,gamser,gln
 
-if(x<0.0_dp .or. a<=0.0_dp) print *, 'bad arguments in gammq' 
+if(x<0.0_dp .or. a<=0.0_dp) print *, 'bad arguments in gammq'
 
-if(x<a+1.0_dp) then 
- call gser(gamser,a,x,gln) 
- gammq=1.0_dp-gamser ! and take its complement. 
-else ! Use the continued fraction representation. 
- call gcf(gammcf,a,x,gln) 
- gammq=gammcf 
-endif 
+if(x<a+1.0_dp) then
+ call gser(gamser,a,x,gln)
+ gammq=1.0_dp-gamser ! and take its complement.
+else ! Use the continued fraction representation.
+ call gcf(gammcf,a,x,gln)
+ gammq=gammcf
+endif
 
-return 
+return
 end function gammq
 
 !_______________________________________________________________________________

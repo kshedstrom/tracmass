@@ -241,7 +241,6 @@ SUBROUTINE loop
 #ifdef larval_fish
            ! Find settling velocity for active gridbox ===
 !           rhof = fish(ntrac,i_density)
-     call light_spot
      call fishgrowth(temp,salt,dens)
 #endif /*larval_fish*/
 
@@ -335,6 +334,8 @@ SUBROUTINE loop
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
 #ifdef fishvel
+           call interp_ll(ib,jb,kb,x1,y1,z1,2)
+           call light_spot
            call fishvel2
 #endif
 #ifdef timeanalyt
