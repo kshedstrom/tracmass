@@ -55,7 +55,7 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =     14,
+          intrun =      4,
 /
 &INIT_WRITE_TRAJS
       twritetype =      1,
