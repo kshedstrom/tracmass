@@ -206,7 +206,7 @@ CONTAINS
 !print *,x1,y1,z1
 
 #if defined textwrite
-    print *, "printing sel", sel
+!   print *, "printing sel", sel
     select case (sel)
     case (10)
 # ifdef larval_fish
