@@ -23,6 +23,7 @@ REAL    :: zppp,zppm,zpmp,zpmm,zmpp,zmpm,zmmp,zmmm
 REAL    :: temp,salt,dens
 REAL    :: srfpp,srfpm,srfmp,srfmm
 REAL    :: hsbpp,hsbpm,hsbmp,hsbmm
+REAL    :: mpp, mpm, mmp, mmm, maskden
 
 INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,kn2,ns,kp2
 ! determining nearest centers of boxes
@@ -72,104 +73,76 @@ INTEGER :: ib,jb,kb,ip,im,jp,jm,kp,kn,kn2,ns,kp2
       az2=(dble(kp2)-z1)
 
 ! temperature, salinity, density calculation
-      tppp=tem(ip,jp,kp,ns)*mask(ip,jp)
-      sppp=sal(ip,jp,kp,ns)*mask(ip,jp)
-      rppp=rho(ip,jp,kp,ns)*mask(ip,jp)
-      if(tppp==0. .and. sppp==0.) then
-       tppp=tem(ip,jp,kn,ns)
-       sppp=sal(ip,jp,kn,ns)
-       rppp=rho(ip,jp,kn,ns)
-      endif
+      mpp = mask(ip,jp)
+      tppp=tem(ip,jp,kp,ns)*mpp
+      sppp=sal(ip,jp,kp,ns)*mpp
+      rppp=rho(ip,jp,kp,ns)*mpp
 
-      tppm=tem(ip,jp,kn,ns)*mask(ip,jp)
-      sppm=sal(ip,jp,kn,ns)*mask(ip,jp)
-      rppm=rho(ip,jp,kn,ns)*mask(ip,jp)
-      if(tppm==0. .and. sppm==0.) then
-       tppm=tem(ip,jp,kn,ns)
-       sppm=sal(ip,jp,kn,ns)
-       rppm=rho(ip,jp,kn,ns)
-      endif
+      tppm=tem(ip,jp,kn,ns)*mpp
+      sppm=sal(ip,jp,kn,ns)*mpp
+      rppm=rho(ip,jp,kn,ns)*mpp
 
-      tpmp=tem(ip,jm,kp,ns)*mask(ip,jm)
-      spmp=sal(ip,jm,kp,ns)*mask(ip,jm)
-      rpmp=rho(ip,jm,kp,ns)*mask(ip,jm)
-      if(tpmp==0. .and. spmp==0.) then
-       tpmp=tem(ip,jp,kn,ns)
-       spmp=sal(ip,jp,kn,ns)
-       rpmp=rho(ip,jp,kn,ns)
-      endif
+      mpm = mask(ip,jm)
+      tpmp=tem(ip,jm,kp,ns)*mpm
+      spmp=sal(ip,jm,kp,ns)*mpm
+      rpmp=rho(ip,jm,kp,ns)*mpm
 
-      tpmm=tem(ip,jm,kn,ns)*mask(ip,jm)
-      spmm=sal(ip,jm,kn,ns)*mask(ip,jm)
-      rpmm=rho(ip,jm,kn,ns)*mask(ip,jm)
-      if(tpmm==0. .and. spmm==0.) then
-       tpmm=tem(ip,jp,kn,ns)
-       spmm=sal(ip,jp,kn,ns)
-       rpmm=rho(ip,jp,kn,ns)
-      endif
+      tpmm=tem(ip,jm,kn,ns)*mpm
+      spmm=sal(ip,jm,kn,ns)*mpm
+      rpmm=rho(ip,jm,kn,ns)*mpm
 
-      tmpp=tem(im,jp,kp,ns)*mask(im,jp)
-      smpp=sal(im,jp,kp,ns)*mask(im,jp)
-      rmpp=rho(im,jp,kp,ns)*mask(im,jp)
-      if(tmpp==0. .and. smpp==0.) then
-       tmpp=tem(ip,jp,kn,ns)
-       smpp=sal(ip,jp,kn,ns)
-       rmpp=rho(ip,jp,kn,ns)
-      endif
+      mmp = mask(im,jp)
+      tmpp=tem(im,jp,kp,ns)*mmp
+      smpp=sal(im,jp,kp,ns)*mmp
+      rmpp=rho(im,jp,kp,ns)*mmp
 
-      tmpm=tem(im,jp,kn,ns)*mask(im,jp)
-      smpm=sal(im,jp,kn,ns)*mask(im,jp)
-      rmpm=rho(im,jp,kn,ns)*mask(im,jp)
-      if(tmpm==0. .and. smpm==0.) then
-       tmpm=tem(ip,jp,kn,ns)
-       smpm=sal(ip,jp,kn,ns)
-       rmpm=rho(ip,jp,kn,ns)
-      endif
+      tmpm=tem(im,jp,kn,ns)*mmp
+      smpm=sal(im,jp,kn,ns)*mmp
+      rmpm=rho(im,jp,kn,ns)*mmp
 
-      tmmp=tem(im,jm,kp,ns)*mask(im,jm)
-      smmp=sal(im,jm,kp,ns)*mask(im,jm)
-      rmmp=rho(im,jm,kp,ns)*mask(im,jm)
-      if(tmmp==0. .and. smmp==0.) then
-       tmmp=tem(ip,jp,kn,ns)
-       smmp=sal(ip,jp,kn,ns)
-       rmmp=rho(ip,jp,kn,ns)
-      endif
+      mmm = mask(im,jm)
+      tmmp=tem(im,jm,kp,ns)*mmm
+      smmp=sal(im,jm,kp,ns)*mmm
+      rmmp=rho(im,jm,kp,ns)*mmm
 
-      tmmm=tem(im,jm,kn,ns)*mask(im,jm)
-      smmm=sal(im,jm,kn,ns)*mask(im,jm)
-      rmmm=rho(im,jm,kn,ns)*mask(im,jm)
-      if(tmmm==0. .and. smmm ==0.) then
-       tmmm=tem(ip,jp,kn,ns)
-       smmm=sal(ip,jp,kn,ns)
-       rmmm=rho(ip,jp,kn,ns)
-      endif
+      tmmm=tem(im,jm,kn,ns)*mmm
+      smmm=sal(im,jm,kn,ns)*mmm
+      rmmm=rho(im,jm,kn,ns)*mmm
 
-      temp=tppp*(1.-ax)*(1.-ay)*(1.-az) &
-        + tmpp*    ax *(1.-ay)*(1.-az) &
-        + tpmp*(1.-ax)*    ay *(1.-az) &
-        + tmmp*    ax *    ay *(1.-az) &
-        + tppm*(1.-ax)*(1.-ay)*    az  &
-        + tmpm*    ax *(1.-ay)*    az  &
-        + tpmm*(1.-ax)*    ay *    az  &
-        + tmmm*    ax *    ay *    az
+      maskden = mpp*(1.-ax)*(1.-ay) &
+              + mmp*    ax *(1.-ay) &
+              + mpm*(1.-ax)*    ay  &
+              + mmm*    ax *    ay
 
-      salt=sppp*(1.-ax)*(1.-ay)*(1.-az) &
-        + smpp*    ax *(1.-ay)*(1.-az) &
-        + spmp*(1.-ax)*    ay *(1.-az) &
-        + smmp*    ax *    ay *(1.-az) &
-        + sppm*(1.-ax)*(1.-ay)*    az  &
-        + smpm*    ax *(1.-ay)*    az  &
-        + spmm*(1.-ax)*    ay *    az  &
-        + smmm*    ax *    ay *    az
+      temp=(tppp*(1.-ax)*(1.-ay)*(1.-az) &
+          + tmpp*    ax *(1.-ay)*(1.-az) &
+          + tpmp*(1.-ax)*    ay *(1.-az) &
+          + tmmp*    ax *    ay *(1.-az) &
+          + tppm*(1.-ax)*(1.-ay)*    az  &
+          + tmpm*    ax *(1.-ay)*    az  &
+          + tpmm*(1.-ax)*    ay *    az  &
+          + tmmm*    ax *    ay *    az) &
+          / maskden
 
-      dens=rppp*(1.-ax)*(1.-ay)*(1.-az) &
-        + rmpp*    ax *(1.-ay)*(1.-az) &
-        + rpmp*(1.-ax)*    ay *(1.-az) &
-        + rmmp*    ax *    ay *(1.-az) &
-        + rppm*(1.-ax)*(1.-ay)*    az  &
-        + rmpm*    ax *(1.-ay)*    az  &
-        + rpmm*(1.-ax)*    ay *    az  &
-        + rmmm*    ax *    ay *    az
+      salt=(sppp*(1.-ax)*(1.-ay)*(1.-az) &
+          + smpp*    ax *(1.-ay)*(1.-az) &
+          + spmp*(1.-ax)*    ay *(1.-az) &
+          + smmp*    ax *    ay *(1.-az) &
+          + sppm*(1.-ax)*(1.-ay)*    az  &
+          + smpm*    ax *(1.-ay)*    az  &
+          + spmm*(1.-ax)*    ay *    az  &
+          + smmm*    ax *    ay *    az) &
+          / maskden
+
+      dens=(rppp*(1.-ax)*(1.-ay)*(1.-az) &
+          + rmpp*    ax *(1.-ay)*(1.-az) &
+          + rpmp*(1.-ax)*    ay *(1.-az) &
+          + rmmp*    ax *    ay *(1.-az) &
+          + rppm*(1.-ax)*(1.-ay)*    az  &
+          + rmpm*    ax *(1.-ay)*    az  &
+          + rpmm*(1.-ax)*    ay *    az  &
+          + rmmm*    ax *    ay *    az) &
+          / maskden
 
 return
 end subroutine interp

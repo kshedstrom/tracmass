@@ -22,9 +22,9 @@ subroutine interp2(i,j,k,temp,salt,dens)
   intrpbg=dmod(ts,1.d0)
   intrpb =1.d0-intrpbg
 
-  temp=intrpbg*tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm)
-  salt=intrpbg*sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm)
-  dens=intrpbg*rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm)
+  temp=intrpbg*(tem(i,j,k,nsp)+intrpb*tem(i,j,k,nsm))*mask(i,j)
+  salt=intrpbg*(sal(i,j,k,nsp)+intrpb*sal(i,j,k,nsm))*mask(i,j)
+  dens=intrpbg*(rho(i,j,k,nsp)+intrpb*rho(i,j,k,nsm))*mask(i,j)
 
   return
 end subroutine interp2

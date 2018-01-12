@@ -1,9 +1,7 @@
 subroutine interp_ll(ib,jb,kb,x1,y1,z1,ns)
 
-!     computes temperature, salinity, density at position of trajectory
+!     computes latitude, longitude, depth at position of trajectory
 !     by interpolating data from the center of eight nearest boxes
-!
-!     This subroutine should be improved in order to include time interpolation
 
 USE mod_grid
 USE mod_vel
